@@ -433,11 +433,6 @@ class Application:
     def generate_bill(self, *args, **kwargs):
         # create the bill before updating to the database.
         #  directory = "D:/Store Management Software/Invoice/" + str(date) + "/"
-        self.total_l.configure(text="Total: Rs." + str(sum(product_price)))
-        self.amount_given = float(66666)
-        self.get_id = self.enteride.get()
-        conn = sqlite3.connect("db_member.db")
-        cursor = conn.cursor()
         directory = "Software\print/"
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -469,41 +464,6 @@ class Application:
         f.write("\n\t\t\tThanks for Visiting.")
         os.startfile(file_name, "print")
         f.close()
-        # decrease the stock
-        self.x = 0
-
-        initial = "SELECT * FROM member WHERE id=?"
-        result = cursor.execute(initial, (product_id[self.x],))
-
-        for i in products_list:
-            for r in result:
-                self.old_stock = r[2]
-            self.new_stock = int(100)
-
-            # updating the stock
-            sql = "UPDATE member SET name=? WHERE id=?"
-            cursor.execute(sql, (self.new_stock, product_id[self.x]))
-            conn.commit()
-
-            # insert into the transaction
-            sql2 = "INSERT INTO member (name,job,address,age) VALUES (?, ?, ?, ?)"
-            cursor.execute(sql2, (products_list[self.x], product_quantity[self.x], product_price[self.x], date))
-            conn.commit()
-
-            self.x += 1
-
-        for a in labels_list:
-            a.destroy()
-
-        del (products_list[:])
-        del (product_id[:])
-        del (product_quantity[:])
-        del (product_price[:])
-
-        self.total_l.configure(text="")
-        self.c_amount.configure(text="")
-        self.change_e.delete(0, END)
-        self.enteride.focus()
         tkinter.messagebox.showinfo("Success", "Done everything smoothly")
 
     #if cv2.waitKey(1) & 0xFF == ord('q'):
