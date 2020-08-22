@@ -19,6 +19,10 @@ from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QDialog, QApplication
 from PyQt5.uic import loadUi
 import imutils
+import win32print
+import win32ui
+from PIL import Image, ImageWin
+
 # date
 date = datetime.datetime.now().date()
 # temporary lists like sessions
@@ -77,18 +81,10 @@ class Application:
                                command=self.quit)
         self.bt_exit1.place(x=8, y=405)
 
-        self.total_l = Label(self.left, text="", font=('arial 8 bold'), bg='lightblue', fg='white')
-        self.total_l.place(x=8, y=460)
-        self.to_give = float(888.9999)
-        self.c_amount = Label(self.left, text="Change: Rs. " + str(self.to_give), font=('arial 18 bold'), fg='red',
-                              bg='white')
-        self.c_amount.place(x=8, y=620)
 
-        self.change_e = Entry(self.left, width=5, font=('arial 18 bold'), bg='lightblue')
-        self.change_e.place(x=8, y=680)
-        self.enteride = Entry(self.left, width=4, font=('arial 18 bold'), bg='lightblue')
-        self.enteride.place(x=190, y=680)
-        self.enteride.focus()
+
+
+
 
     def Search(self, *args, **kwargs):
         # =====================================Table WIDGET=========================================
@@ -182,6 +178,10 @@ class Application:
         self.nbh = Entry(self.bottom,font=('arial 24 bold'), width=20)
         self.nbh.place(x=410, y=175)
 
+        self.enteride = Entry(self.bottom, width=25, font=('arial 18 bold'), bg='lightblue')
+        self.enteride.place(x=800, y=175)
+        self.enteride.focus()
+
         self.droplist = OptionMenu(self.bottom, c, 'NAM', 'NỮ')
         self.droplist.pack()
         self.menu = self.droplist.nametowidget(self.droplist.menuname)
@@ -214,6 +214,8 @@ class Application:
         self.born_s2.place(x=650, y=10)
         self.born_agess = Entry(self.bottom1, font=('arial 20 bold'), width=5)
         self.born_agess.place(x=650, y=38)
+
+
 
         self.scrollbarx = Scrollbar(self.RightForm, orient=HORIZONTAL)
         self.scrollbary = Scrollbar(self.RightForm, orient=VERTICAL)
@@ -433,6 +435,55 @@ class Application:
     def generate_bill(self, *args, **kwargs):
         # create the bill before updating to the database.
         #  directory = "D:/Store Management Software/Invoice/" + str(date) + "/"
+        # HORZRES = 8
+        # VERTRES = 10
+        # LOGPIXELSX = 88
+        # LOGPIXELSY = 90
+        # PHYSICALWIDTH = 110
+        # PHYSICALHEIGHT = 111
+        # PHYSICALOFFSETX = 112
+        # PHYSICALOFFSETY = 113
+        #
+        # printer_name = win32print.GetDefaultPrinter()
+        # file_name = "demo.png"
+        # hDC = win32ui.CreateDC()
+        # hDC.CreatePrinterDC(printer_name)
+        # printable_area = hDC.GetDeviceCaps(HORZRES), hDC.GetDeviceCaps(VERTRES)
+        # printer_size = hDC.GetDeviceCaps(PHYSICALWIDTH), hDC.GetDeviceCaps(PHYSICALHEIGHT)
+        # printer_margins = hDC.GetDeviceCaps(PHYSICALOFFSETX), hDC.GetDeviceCaps(PHYSICALOFFSETY)
+        # bmp = Image.open(file_name)
+        # if bmp.size[0] > bmp.size[1]:
+        #     bmp = bmp.rotate(90)
+        #
+        # ratios = [1.0 * printable_area[0] / bmp.size[0], 1.0 * printable_area[1] / bmp.size[1]]
+        # scale = min(ratios)
+        # hDC.StartDoc(file_name)
+        # hDC.StartPage()
+        #
+        # dib = ImageWin.Dib(bmp)
+        # scaled_width, scaled_height = [int(scale * i) for i in bmp.size]
+        # x1 = int((printer_size[0] - scaled_width) / 2)
+        # y1 = int((printer_size[1] - scaled_height) / 2)
+        # x2 = x1 + scaled_width
+        # y2 = y1 + scaled_height
+        # dib.draw(hDC.GetHandleOutput(), (x1, y1, x2, y2))
+        #
+        # hDC.EndPage()
+        # hDC.EndDoc()
+        # hDC.DeleteDC()
+
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        self.get_id = self.enteride.get()
+        query = "SELECT * FROM new_employee WHERE id=?"
+
+        result = cursor.execute(query, (self.get_id,))
+        for self.r in result:
+            self.get_id = self.r[0]
+            self.get_name = self.r[1]
+           # self.get_price = self.r[3]
+            self.get_stock = self.r[2]
+
         directory = "Software\print/"
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -443,11 +494,9 @@ class Application:
         phone = "\t\t\t\t\t99999999999\n"
         sample = "\t\t\t\t\tInvoice\n"
         dt = "\t\t\t\t\t" + str(date)
-
         table_header = "\n\n\t\t\t---------------------------------------\n\t\t\tSN.\tProducts\t\tQty\t\tAmount\n\t\t\t---------------------------------------"
-        final = company + address + phone + sample + dt + "\n" + table_header
-
-        # open a file to write it to
+        #final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
+        final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
         file_name = str(directory) + str(random.randrange(5000, 10000)) + ".doc"
         f = open(file_name, 'w')
         f.write(final)
@@ -518,7 +567,6 @@ class tehseencode(QDialog):
                     rows = cur.fetchall()
                     for row in rows:
                         print("%s" % (row["max(id)"]))
-
                     #initial = "SELECT * FROM inventory WHERE id=?"
                     #result = c.execute(initial, (product_id[self.x],))
                     cv2.imwrite('anh\%s.png' % (row["max(id)"]), frame1)
