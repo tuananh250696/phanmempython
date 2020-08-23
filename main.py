@@ -435,46 +435,10 @@ class Application:
     def generate_bill(self, *args, **kwargs):
         # create the bill before updating to the database.
         #  directory = "D:/Store Management Software/Invoice/" + str(date) + "/"
-        # HORZRES = 8
-        # VERTRES = 10
-        # LOGPIXELSX = 88
-        # LOGPIXELSY = 90
-        # PHYSICALWIDTH = 110
-        # PHYSICALHEIGHT = 111
-        # PHYSICALOFFSETX = 112
-        # PHYSICALOFFSETY = 113
-        #
-        # printer_name = win32print.GetDefaultPrinter()
-        # file_name = "demo.png"
-        # hDC = win32ui.CreateDC()
-        # hDC.CreatePrinterDC(printer_name)
-        # printable_area = hDC.GetDeviceCaps(HORZRES), hDC.GetDeviceCaps(VERTRES)
-        # printer_size = hDC.GetDeviceCaps(PHYSICALWIDTH), hDC.GetDeviceCaps(PHYSICALHEIGHT)
-        # printer_margins = hDC.GetDeviceCaps(PHYSICALOFFSETX), hDC.GetDeviceCaps(PHYSICALOFFSETY)
-        # bmp = Image.open(file_name)
-        # if bmp.size[0] > bmp.size[1]:
-        #     bmp = bmp.rotate(90)
-        #
-        # ratios = [1.0 * printable_area[0] / bmp.size[0], 1.0 * printable_area[1] / bmp.size[1]]
-        # scale = min(ratios)
-        # hDC.StartDoc(file_name)
-        # hDC.StartPage()
-        #
-        # dib = ImageWin.Dib(bmp)
-        # scaled_width, scaled_height = [int(scale * i) for i in bmp.size]
-        # x1 = int((printer_size[0] - scaled_width) / 2)
-        # y1 = int((printer_size[1] - scaled_height) / 2)
-        # x2 = x1 + scaled_width
-        # y2 = y1 + scaled_height
-        # dib.draw(hDC.GetHandleOutput(), (x1, y1, x2, y2))
-        #
-        # hDC.EndPage()
-        # hDC.EndDoc()
-        # hDC.DeleteDC()
 
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
-        self.get_id = self.enteride.get()
+        self.get_id = 6
         query = "SELECT * FROM new_employee WHERE id=?"
 
         result = cursor.execute(query, (self.get_id,))
@@ -497,6 +461,7 @@ class Application:
         table_header = "\n\n\t\t\t---------------------------------------\n\t\t\tSN.\tProducts\t\tQty\t\tAmount\n\t\t\t---------------------------------------"
         #final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
         final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
+
         file_name = str(directory) + str(random.randrange(5000, 10000)) + ".doc"
         f = open(file_name, 'w')
         f.write(final)
