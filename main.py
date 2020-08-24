@@ -22,7 +22,7 @@ import imutils
 import win32print
 import win32ui
 from PIL import Image, ImageWin
-
+import win32con
 # date
 date = datetime.datetime.now().date()
 # temporary lists like sessions
@@ -41,6 +41,7 @@ var = IntVar()
 var1 = IntVar()
 c = StringVar()
 c1 = StringVar()
+
 
 
 class Application:
@@ -80,11 +81,6 @@ class Application:
         self.bt_exit1 = Button(self.left, text="Thoát", width=18, height=2, font=('arial 18 bold'), bg='orange',
                                command=self.quit)
         self.bt_exit1.place(x=8, y=405)
-
-
-
-
-
 
     def Search(self, *args, **kwargs):
         # =====================================Table WIDGET=========================================
@@ -132,7 +128,7 @@ class Application:
                                    command=self.generate_bill)
         self.bt_open_file.place(x=160, y=0)
         #
-        self.bt_save_file = Button(self.right, text="Làm mới", width=15, height=2, font=('arial 12 bold'), bg='white')
+        self.bt_save_file = Button(self.right, text="Làm mới", width=15, height=2, font=('arial 12 bold'), bg='white',command=self.delete_text)
         self.bt_save_file.place(x=320, y=0)
         #
         self.bt_delele1 = Button(self.right, text="Xóa", width=15, height=2, font=('arial 12 bold'), bg='white',
@@ -247,7 +243,8 @@ class Application:
             cursor.execute("DELETE FROM member WHERE id=?", (self.tree.set(selected_item, '#1'),))
             conn.commit()
             self.tree.delete(selected_item)
-        conn.close()
+        conn.commit()
+        cursor.close()
 
 
     def get_itemsdatabase(self, *args, **kwargs):
@@ -262,7 +259,7 @@ class Application:
             cursor.execute('INSERT INTO member (name, address, age, job, symptom,sbh,sex ) VALUES(?,?,?,?,?,?,?)',(self.name_p.get(),self.adr_p.get(), self.y_b.get(),self.jobw.get(), self.stom.get(), self.nbh.get(),c.get()))
             conn.commit()
             # textbox insert
-            tkinter.messagebox.showinfo("Success", "Successfully added to the database")
+            #tkinter.messagebox.showinfo("Success", "Successfully added to the database")
             self.openFrame()
 
 
@@ -297,6 +294,8 @@ class Application:
                            (namepk, name_dt, address_pk))
             conn.commit()
             tkinter.messagebox.showinfo("Success", "Successfully added to the database")
+            conn.commit()
+            cursor.close()
 
     def add_to_bn(self, *args, **kwargs):
         addWindow = Toplevel(root)
@@ -349,6 +348,8 @@ class Application:
                            (nameadd22, name_dt22))
             conn.commit()
             tkinter.messagebox.showinfo("Success", "Successfully added to the database")
+            conn.commit()
+            cursor.close()
 
     def createNewWindow(self, *args, **kwarg):
         newWindowaddf = Toplevel(root)
@@ -415,6 +416,7 @@ class Application:
         conn.close()
 
 
+
     def quit(self):
         root.destroy()
 
@@ -431,11 +433,93 @@ class Application:
     def show(self):
         root.update()
         root.deiconify()
-
+  #https://www.youtube.com/watch?v=VvM-uAp9zW8
     def generate_bill(self, *args, **kwargs):
+        conn = sqlite3.connect("db_member.db")
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("SELECT max(id) FROM member")
+        rows = cur.fetchall()
+        for row in rows:
+             print("%s" % (row["max(id)"]))
+        HORZRES = 8
+        VERTRES = 10
+        LOGPIXELSX = 88
+        LOGPIXELSY = 90
+        PHYSICALWIDTH = 110
+        PHYSICALHEIGHT = 111
+        PHYSICALOFFSETX = 112
+        PHYSICALOFFSETY = 113
+        INCH = 1440
+        printer_name = win32print.GetDefaultPrinter()
+        file_name = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(1)))
+        file_name1 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(2)))
+        file_name2 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(3)))
+        file_name3 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(1)))
+        file_name4 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(2)))
+        file_name5 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(3)))
+
+        hDC = win32ui.CreateDC()
+        hDC.CreatePrinterDC(printer_name)
+        printable_area = hDC.GetDeviceCaps(HORZRES), hDC.GetDeviceCaps(VERTRES)
+        printer_size = hDC.GetDeviceCaps(PHYSICALWIDTH), hDC.GetDeviceCaps(PHYSICALHEIGHT)
+        printer_margins = hDC.GetDeviceCaps(PHYSICALOFFSETX), hDC.GetDeviceCaps(PHYSICALOFFSETY)
+        bmp = Image.open(file_name)
+        bmp1 = Image.open(file_name1)
+        bmp2 = Image.open(file_name2)
+        bmp3 = Image.open(file_name3)
+        bmp4 = Image.open(file_name4)
+        bmp5 = Image.open(file_name5)
+
+        ratios = [1.0 * printable_area[0] / bmp.size[0], 1.0 * printable_area[1] / bmp.size[1]]
+        scale = min(ratios)
+        hDC.StartDoc(file_name)
+        hDC.StartPage()
+
+        dib = ImageWin.Dib(bmp)
+        dib1 = ImageWin.Dib(bmp1)
+        dib2 = ImageWin.Dib(bmp2)
+        dib3 = ImageWin.Dib(bmp3)
+        dib4 = ImageWin.Dib(bmp4)
+        dib5 = ImageWin.Dib(bmp5)
+        scaled_width, scaled_height = [int(scale * i) for i in bmp.size]
+        #scaled_width, scaled_height = [int(scale * i) for i in bmp1.size]
+        x1 = int((printer_size[0] - scaled_width) / 2)
+        y1 = int((printer_size[1] - scaled_height) / 2)
+        x2 = x1 + scaled_width
+        y2 = y1 + scaled_height
+        dib.draw(hDC.GetHandleOutput(), (0, 1400, 1450, 2400))
+        dib1.draw(hDC.GetHandleOutput(), (1470, 1400,2920, 2400))
+        dib2.draw(hDC.GetHandleOutput(), (2940, 1400,4390, 2400))
+        dib3.draw(hDC.GetHandleOutput(), (0, 2800, 1450, 3800))
+        dib4.draw(hDC.GetHandleOutput(), (1470, 2800, 2920, 3800))
+        dib5.draw(hDC.GetHandleOutput(), (2940, 2800, 4390, 3800))
+
+        hDC.SetMapMode(win32con.MM_TWIPS)
+        company = "\t\t\t\t test machine printPvt8888888888888 trtrtrtrrrrrrrrrrrrrt. Ltd.\n"
+        address = "\t\t\t\ttest2, rrrrrrrrrrrrrrr        rrrrrr8rrrrrrrrrrrrrrtbgbgbgb\n"
+        phone = "\t\t\t\t\t9999555555555555555555555556666666666688888889999999\n"
+        sample = "\t\t\t\t\tInvoice\n"
+        hDC.DrawText(company + address + phone + sample, (0, INCH * -8, INCH * 8, INCH * -9),5)
+
+        company = "\t\t\t\t test machine printPvt8888888888888 trtrtrtrrrrrrrrrrrrrt. Ltd.\n"
+        address = "\t\t\t\ttest2, rrrrrrrrrrrrrrr        rrrrrr8rrrrrrrrrrrrrrtbgbgbgb\n"
+        phone = "\t\t\t\t\t9999555555555555555555555556666666666688888889999999\n"
+        sample = "\t\t\t\t\tInvoice\n"
+        hDC.DrawText(company + address, (0, INCH * -1, INCH * 8, INCH * -2), 5)
+
+        hDC.EndPage()
+        hDC.EndDoc()
+        hDC.DeleteDC()
+
+        #os.remove('t2.jpg')
+        conn.commit()
+        cur.close()
         # create the bill before updating to the database.
         #  directory = "D:/Store Management Software/Invoice/" + str(date) + "/"
 
+
+    def generate_bill2(self, *args, **kwargs):
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
         self.get_id = 6
@@ -445,7 +529,6 @@ class Application:
         for self.r in result:
             self.get_id = self.r[0]
             self.get_name = self.r[1]
-           # self.get_price = self.r[3]
             self.get_stock = self.r[2]
 
         directory = "Software\print/"
@@ -479,6 +562,8 @@ class Application:
         os.startfile(file_name, "print")
         f.close()
         tkinter.messagebox.showinfo("Success", "Done everything smoothly")
+        conn.commit()
+        cursor.close()
 
     #if cv2.waitKey(1) & 0xFF == ord('q'):
     #    break
@@ -488,23 +573,13 @@ class tehseencode(QDialog):
         super(tehseencode, self).__init__()
         loadUi("untitled2.ui", self)
         self.logic = 0
-        self.value = 1
+        self.value = 0
         self.SHOW.clicked.connect(self.onClicked)
         self.TEXT.setText("Kindly Press 'Show' to connect with webcam.")
         self.CAPTURE.clicked.connect(self.CaptureClicked)
         self.CAPTURE_2.clicked.connect(self.f2vrec)
         self.NEXT_7.clicked.connect(self.onClose)
     @pyqtSlot()
-
-    # def retriverImage(self):
-    #     conn = sqlite3.connect("db_member.db")
-    #     cursor = conn.cursor()
-    #     cursor.execute("""SELECT * FROM new_employee""")
-    #     result=cursor.fetchone()
-    #     image=result[0]
-    #     pixmap=QtGui.QPixmap()
-
-        #cursor.execute("SELECT * FROM `member` WHERE `name` LIKE ? AND `job`
 
     def onClicked(self):
 
@@ -517,37 +592,35 @@ class tehseencode(QDialog):
             frame = imutils.resize(frame, width=800, height=600)
             frame1 = imutils.resize(frame, width=200, height=150)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
             if ret == True:
                # print('here')
                 self.displayImage(frame, 1)
                 cv2.waitKey()
                 if (self.logic == 2):
-                    self.value = self.value + 1
+                    self.value = self.value+1
                     conn = sqlite3.connect("db_member.db")
-                    cursor = conn.cursor()
                     conn.row_factory = sqlite3.Row
                     cur = conn.cursor()
                     cur.execute("SELECT max(id) FROM member")
                     rows = cur.fetchall()
                     for row in rows:
                         print("%s" % (row["max(id)"]))
+                    cv2.imwrite('anh\%s.png' % ("a" + str(row["max(id)"]) + str(self.value)), frame1)
+                    self.TEXT.setText('your Image have been Saved')
                     #initial = "SELECT * FROM inventory WHERE id=?"
                     #result = c.execute(initial, (product_id[self.x],))
-                    cv2.imwrite('anh\%s.png' % (row["max(id)"]), frame1)
-                    self.TEXT.setText('your Image have been Saved')
-                    with open('anh\%s.png' % (row["max(id)"]), 'rb') as f:
-                        data = f.read()
-                    cursor.execute('INSERT INTO new_employee (name,photo)  VALUES(?,?)', (row["max(id)"], data))
+                    # with open('anh\%s.png' % (row["max(id)"]), 'rb') as f:
+                    #     data = f.read()
+                    # cursor.execute('INSERT INTO new_employee (name,photo)  VALUES(?,?)', (row["max(id)"], data))
                     conn.commit()
-                    cursor.close()
                     conn.close()
-                    os.remove('anh\%s.png' % (row["max(id)"]))
+                    #os.remove('anh\%s.png' % (row["max(id)"]))
                     self.logic = 1
                 if (self.logic == 3):
                     op.write(frame)
                 if (self.logic == 4):
                     cap.release()
+                    conn.close()
                     break
 
             else:
