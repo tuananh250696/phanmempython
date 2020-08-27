@@ -174,9 +174,9 @@ class Application:
         self.nbh = Entry(self.bottom,font=('arial 24 bold'), width=20)
         self.nbh.place(x=410, y=175)
 
-        self.enteride = Entry(self.bottom, width=25, font=('arial 18 bold'), bg='lightblue')
-        self.enteride.place(x=800, y=175)
-        self.enteride.focus()
+        # self.enteride = Entry(self.bottom, width=25, font=('arial 18 bold'), bg='lightblue')
+        # self.enteride.place(x=800, y=175)
+        # self.enteride.focus()
 
         self.droplist = OptionMenu(self.bottom, c, 'NAM', 'NỮ')
         self.droplist.pack()
@@ -240,7 +240,7 @@ class Application:
         cursor = conn.cursor()
         for selected_item in self.tree.selection():
             print(selected_item)  # it prints the selected row id
-            cursor.execute("DELETE FROM member WHERE id=?", (self.tree.set(selected_item, '#1'),))
+            cursor.execute("DELETE FROM member WHERE Id=?", (self.tree.set(selected_item, '#1'),))
             conn.commit()
             self.tree.delete(selected_item)
         conn.commit()
@@ -282,58 +282,112 @@ class Application:
 
         namepk = self.adr2_p.get()
         name_dt = self.n2_p.get()
-        address_pk = self.n2_p.get()
+        address_pk = self.doctor_p.get()
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
+
         if namepk== '' or name_dt== '' or address_pk == '':
-            tkinter.messagebox.showinfo("Error", "Please Fill all the entries.")
+            tkinter.messagebox.showinfo("Error", "Điền đầy đủ thông tin.")
 
         else:
+
+            cursor.execute("DELETE FROM print_dt WHERE id=1")
             cursor.execute('CREATE TABLE IF NOT EXISTS print_dt (name_pk TEXT,dt_name TEXT,address TEXT)')
             cursor.execute('INSERT INTO print_dt (name_pk,dt_name,address) VALUES(?,?,?)',
                            (namepk, name_dt, address_pk))
-            conn.commit()
-            tkinter.messagebox.showinfo("Success", "Successfully added to the database")
+            tkinter.messagebox.showinfo("Success", "Đã thêm thông tin")
             conn.commit()
             cursor.close()
 
     def add_to_bn(self, *args, **kwargs):
         addWindow = Toplevel(root)
         addWindow.title("Set form print")
-        addWindow.geometry("600x350")
-        self.rightadd2 = Frame(addWindow, width=600, height=450, bg='lightblue')
-        self.rightadd2.pack(side=TOP)
+        addWindow.geometry("1200x600")
+        self.rightw2 = Frame(addWindow, width=550, height=600, bg='lightblue')
+        self.rightw2.pack(side=RIGHT)
+        self.rightw3 = Frame(addWindow, width=600, height=600, bg='lightblue')
+        self.rightw3.pack(side=LEFT)
 
-        self.adr2 = Label(self.rightadd2, text="Phòng khám:", font=('arial 16 bold'), fg='black', bg='lightblue')
+        self.adr2 = Label(self.rightw3, text="Phòng khám:", font=('arial 16 bold'), fg='black', bg='lightblue')
         self.adr2.place(x=10, y=10)
-        self.adr2_p = Entry(self.rightadd2, font=('arial 18 bold'), width=32)
+        self.adr2_p = Entry(self.rightw3, font=('arial 18 bold'), width=32)
         self.adr2_p.place(x=150, y=10)
 
-        self.doctor = Label(self.rightadd2, text=" Bác sĩ :", font=('arial 16 bold'), fg='black', bg='lightblue')
+        self.doctor = Label(self.rightw3, text=" Bác sĩ :", font=('arial 16 bold'), fg='black', bg='lightblue')
         self.doctor.place(x=10, y=85)
 
-        self.doctor_p = Entry(self.rightadd2, font=('arial 18 bold'), width=32)
+        self.doctor_p = Entry(self.rightw3, font=('arial 18 bold'), width=32)
         self.doctor_p.place(x=150, y=75)
 
-        self.n2 = Label(self.rightadd2, text="Địa chỉ:", font=('arial 16 bold'), fg='black', bg='lightblue')
+        self.n2 = Label(self.rightw3, text="Địa chỉ:", font=('arial 16 bold'), fg='black', bg='lightblue')
         self.n2.place(x=10, y=150)
 
-        self.n2_p = Entry(self.rightadd2, font=('arial 18 bold'), width=32)
+        self.n2_p = Entry(self.rightw3, font=('arial 18 bold'), width=32)
         self.n2_p.place(x=150, y=150)
 
-        self.add_dt = Button(self.rightadd2, text="Thêm", width=12, height=1, font=('arial 18 bold'), bg='orange',command=self.database_print)
+        self.add_dt = Button(self.rightw3, text="Cập nhật", width=12, height=2, font=('arial 18 bold'), bg='orange',command=self.database_print)
         self.add_dt.place(x=10, y=260)
 
-        self.add_dl = Button(self.rightadd2, text="Sửa", width=12, height=1, font=('arial 18 bold'), bg='orange',
-                             )
+        self.add_dl = Button(self.rightw3, text="Xóa", width=12, height=2, font=('arial 18 bold'), bg='orange',command=self.Deletedata_print)
         self.add_dl.place(x=200, y=260)
 
-        self.add_dltd = Button(self.rightadd2, text="Xóa", width=12, height=1, font=('arial 18 bold'), bg='orange',
-                               )
+        self.add_dltd = Button(self.rightw3, text="Đóng", width=12, height=2, font=('arial 18 bold'), bg='orange',command=self.quit_print2)
         self.add_dltd.place(x=390, y=260)
 
-    def database_print111(self, *args, **kwargs):
+        self.scrollbarx = Scrollbar(self.rightw2, orient=HORIZONTAL)
+        self.scrollbary = Scrollbar(self.rightw2, orient=VERTICAL)
+        self.tree1 = ttk.Treeview(self.rightw2, columns=("Id", "Phòng khám", "Bác sĩ", "Địa chỉ"),
+                                 selectmode="extended",
+                                 height=400, yscrollcommand=self.scrollbary.set, xscrollcommand=self.scrollbarx.set)
+        self.scrollbary.config(command=self.tree1.yview)
+        self.scrollbary.pack(side=RIGHT, fill=Y)
+        self.scrollbarx.config(command=self.tree1.xview)
+        self.scrollbarx.pack(side=BOTTOM, fill=X)
+        self.tree1.column('#0', stretch=NO, minwidth=0, width=0)
+        self.tree1.column('#1', stretch=NO, minwidth=0, width=30)
+        self.tree1.column('#2', stretch=NO, minwidth=0, width=250)
+        self.tree1.column('#3', stretch=NO, minwidth=0, width=150)
+        self.tree1.column('#4', stretch=NO, minwidth=0, width=150)
 
+        self.tree1.pack()
+        self.tree1.heading('Id', text="Id", anchor=W)
+        self.tree1.heading('Phòng khám', text="Phòng khám", anchor=W)
+        self.tree1.heading('Bác sĩ', text="Bác sĩ", anchor=W)
+        self.tree1.heading('Địa chỉ', text="Địa chỉ", anchor=W)
+        self.tree1.pack()
+
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM `print_dt`")
+        fetch = cursor.fetchall()
+        for data in fetch:
+            self.tree1.insert('', 'end', values=(data))
+        cursor.close()
+        conn.close()
+
+    def Deletedata_print(self):
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        for selected_item1 in self.tree1.selection():
+            print(selected_item1)  # it prints the selected row id
+            cursor.execute("DELETE FROM print_dt WHERE id=?", (self.tree1.set(selected_item1, '#1'),))
+            conn.commit()
+            self.tree1.delete(selected_item1)
+        conn.commit()
+        cursor.close()
+
+    def Chosedata_print(self):
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        for selected_item1 in self.tree1.selection():
+            print(selected_item1)  # it prints the selected row id
+            cursor.execute("DELETE FROM print_dt WHERE id=?", (self.tree1.set(selected_item1, '#1'),))
+            conn.commit()
+            self.tree1.delete(selected_item1)
+        conn.commit()
+        cursor.close()
+
+    def database_print111(self, *args, **kwargs):
         nameadd22 = c1.get()
         name_dt22 = self.ad_if2.get()
 
@@ -346,8 +400,7 @@ class Application:
             cursor.execute('CREATE TABLE IF NOT EXISTS print_dt22 (name_pk22 TEXT,dt_name22 TEXT)')
             cursor.execute('INSERT INTO print_dt22 (name_pk22,dt_name22) VALUES(?,?)',
                            (nameadd22, name_dt22))
-            conn.commit()
-            tkinter.messagebox.showinfo("Success", "Successfully added to the database")
+            tkinter.messagebox.showinfo("Success", "Đã thêm thông tin")
             conn.commit()
             cursor.close()
 
@@ -380,45 +433,59 @@ class Application:
         self.droplist.config(width=16,height=2,font=('arial 18 bold'))
         self.droplist.place(x=5, y=120)
 
-        self.add_ifmt = Button(self.rightw3,text="Thêm", width=14, height=2, font=('arial 20 bold'), bg='orange',command=self.database_print111)
+        self.add_ifmt = Button(self.rightw3,text="Cập nhật", width=14, height=2, font=('arial 20 bold'), bg='orange',command=self.database_print111)
         self.add_ifmt.place(x=5, y=200)
 
-        self.add_dltifmt = Button(self.rightw3, text="Lưu", width=14, height=2, font=('arial 20 bold'),
-                                  bg='orange')
+        self.add_dltifmt = Button(self.rightw3, text="Xóa", width=14, height=2, font=('arial 20 bold'),
+                                  bg='orange',command=self.Deletedata_NewWindow)
         self.add_dltifmt.place(x=5, y=300)
 
-        self.add_dltd = Button(self.rightw3, text="Xóa", width=14, height=2, font=('arial 20 bold'),
-                               bg='orange')
+        self.add_dltd = Button(self.rightw3, text="Đóng", width=14, height=2, font=('arial 20 bold'),
+                               bg='orange',command=self.quit_print1 )
         self.add_dltd.place(x=5, y=400)
         scrollbary = Scrollbar(self.rightw2, orient=VERTICAL)
         scrollbarx = Scrollbar(self.rightw2, orient=HORIZONTAL)
-        tree = ttk.Treeview(self.rightw2, columns=("Diagnostic", "Firstname"),
+        self.tree2 = ttk.Treeview(self.rightw2, columns=("Diagnostic", "Firstname"),
                             selectmode="extended", height=500, yscrollcommand=scrollbary.set,
                             xscrollcommand=scrollbarx.set)
-        scrollbary.config(command=tree.yview)
+        scrollbary.config(command=self.tree2.yview)
         scrollbary.pack(side=RIGHT, fill=Y)
-        scrollbarx.config(command=tree.xview)
+        scrollbarx.config(command=self.tree2.xview)
         scrollbarx.pack(side=BOTTOM, fill=X)
-        tree.heading('Diagnostic', text="Diagnostic", anchor=W)
-        tree.heading('Firstname', text="Firstname", anchor=W)
-        tree.column('#0', stretch=NO, minwidth=0, width=0)
-        tree.column('#1', stretch=NO, minwidth=0, width=200)
-        tree.column('#2', stretch=NO, minwidth=0, width=300)
-        tree.pack()
+        self.tree2.heading('Diagnostic', text="Diagnostic", anchor=W)
+        self.tree2.heading('Firstname', text="Firstname", anchor=W)
+        self.tree2.column('#0', stretch=NO, minwidth=0, width=0)
+        self.tree2.column('#1', stretch=NO, minwidth=0, width=200)
+        self.tree2.column('#2', stretch=NO, minwidth=0, width=300)
+        self.tree2.pack()
 
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM `print_dt22`")
         fetch = cursor.fetchall()
         for data in fetch:
-            tree.insert('', 'end', values=(data))
+            self.tree2.insert('', 'end', values=(data))
         cursor.close()
         conn.close()
 
-
+    def Deletedata_NewWindow(self):
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        for selected_item1 in self.tree2.selection():
+            print(selected_item1)  # it prints the selected row id
+            cursor.execute("DELETE FROM print_dt22 WHERE name_pk22=?", (self.tree2.set(selected_item1, '#1'),))
+            conn.commit()
+            self.tree2.delete(selected_item1)
+        conn.commit()
+        cursor.close()
 
     def quit(self):
         root.destroy()
+    def quit_print1(self):
+        tkinter.messagebox.showinfo("Success", "Thoát cài đặt danh mục")
+
+    def quit_print2(self):
+        tkinter.messagebox.showinfo("Success", "Thoát cài đặt biểu mẫu")
 
     def hide(self):
         root.withdraw()
@@ -442,6 +509,8 @@ class Application:
         rows = cur.fetchall()
         for row in rows:
              print("%s" % (row["max(id)"]))
+
+
         HORZRES = 8
         VERTRES = 10
         LOGPIXELSX = 88
@@ -452,12 +521,12 @@ class Application:
         PHYSICALOFFSETY = 113
         INCH = 1440
         printer_name = win32print.GetDefaultPrinter()
-        file_name = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(1)))
-        file_name1 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(2)))
-        file_name2 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(3)))
-        file_name3 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(1)))
-        file_name4 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(2)))
-        file_name5 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + str(3)))
+        file_name = ('anh\%s.png' % ("a" +  str(row["max(id)"]) + "a" +str(1)))
+        file_name1 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(2)))
+        file_name2 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(3)))
+        file_name3 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(1)))
+        file_name4 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(2)))
+        file_name5 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(3)))
 
         hDC = win32ui.CreateDC()
         hDC.CreatePrinterDC(printer_name)
@@ -495,6 +564,15 @@ class Application:
         dib4.draw(hDC.GetHandleOutput(), (1470, 2800, 2920, 3800))
         dib5.draw(hDC.GetHandleOutput(), (2940, 2800, 4390, 3800))
 
+        cur2 = conn.cursor()
+        cur2.execute("SELECT name_pk FROM print_dt")
+        cur3 = conn.cursor()
+        cur3.execute("SELECT name_pk FROM print_dt")
+        rows2 = cur2.fetchall()
+        for row2 in rows2:
+             print("%s" % (row2["name_pk"]))
+
+
         hDC.SetMapMode(win32con.MM_TWIPS)
         company = "\t\t\t\t test machine printPvt8888888888888 trtrtrtrrrrrrrrrrrrrt. Ltd.\n"
         address = "\t\t\t\ttest2, rrrrrrrrrrrrrrr        rrrrrr8rrrrrrrrrrrrrrtbgbgbgb\n"
@@ -502,11 +580,7 @@ class Application:
         sample = "\t\t\t\t\tInvoice\n"
         hDC.DrawText(company + address + phone + sample, (0, INCH * -8, INCH * 8, INCH * -9),5)
 
-        company = "\t\t\t\t test machine printPvt8888888888888 trtrtrtrrrrrrrrrrrrrt. Ltd.\n"
-        address = "\t\t\t\ttest2, rrrrrrrrrrrrrrr        rrrrrr8rrrrrrrrrrrrrrtbgbgbgb\n"
-        phone = "\t\t\t\t\t9999555555555555555555555556666666666688888889999999\n"
-        sample = "\t\t\t\t\tInvoice\n"
-        hDC.DrawText(company + address, (0, INCH * -1, INCH * 8, INCH * -2), 5)
+        hDC.DrawText(row2["name_pk"], (0, INCH * -1, INCH * 8, INCH * -2),5)
 
         hDC.EndPage()
         hDC.EndDoc()
@@ -518,52 +592,6 @@ class Application:
         # create the bill before updating to the database.
         #  directory = "D:/Store Management Software/Invoice/" + str(date) + "/"
 
-
-    def generate_bill2(self, *args, **kwargs):
-        conn = sqlite3.connect("db_member.db")
-        cursor = conn.cursor()
-        self.get_id = 6
-        query = "SELECT * FROM new_employee WHERE id=?"
-
-        result = cursor.execute(query, (self.get_id,))
-        for self.r in result:
-            self.get_id = self.r[0]
-            self.get_name = self.r[1]
-            self.get_stock = self.r[2]
-
-        directory = "Software\print/"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        # TEMPLATES FOR THE BILL
-        company = "\t\t\t\t test machine printPvt. Ltd.\n"
-        address = "\t\t\t\ttest2, bgbgbgb\n"
-        phone = "\t\t\t\t\t99999999999\n"
-        sample = "\t\t\t\t\tInvoice\n"
-        dt = "\t\t\t\t\t" + str(date)
-        table_header = "\n\n\t\t\t---------------------------------------\n\t\t\tSN.\tProducts\t\tQty\t\tAmount\n\t\t\t---------------------------------------"
-        #final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
-        final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
-
-        file_name = str(directory) + str(random.randrange(5000, 10000)) + ".doc"
-        f = open(file_name, 'w')
-        f.write(final)
-
-        # fill dynamics
-        r = 1
-        i = 0
-        for t in products_list:
-            f.write("\n\t\t\t" + str(r) + "\t" + str(products_list[i] + ".......")[:7] + "\t\t" + str(
-                product_quantity[i]) + "\t\t" + str(product_price[i]))
-            i += 1
-            r += 1
-        f.write("\n\n\t\t\tTotal: Rs. " + str(sum(product_price)))
-        f.write("\n\t\t\tThanks for Visiting.")
-        os.startfile(file_name, "print")
-        f.close()
-        tkinter.messagebox.showinfo("Success", "Done everything smoothly")
-        conn.commit()
-        cursor.close()
 
     #if cv2.waitKey(1) & 0xFF == ord('q'):
     #    break
@@ -608,13 +636,9 @@ class tehseencode(QDialog):
                         os.makedirs(directory)
                     for row in rows:
                         print("%s" % (row["max(id)"]))
-                    cv2.imwrite('anh\%s.png' % ("a" + str(row["max(id)"]) + str(self.value)), frame1)
+                    cv2.imwrite('anh\%s.png' % ("a" + str(row["max(id)"])+ "a"  + str(self.value)), frame1)
                     self.TEXT.setText('your Image have been Saved')
-                    #initial = "SELECT * FROM inventory WHERE id=?"
-                    #result = c.execute(initial, (product_id[self.x],))
-                    # with open('anh\%s.png' % (row["max(id)"]), 'rb') as f:
-                    #     data = f.read()
-                    # cursor.execute('INSERT INTO new_employee (name,photo)  VALUES(?,?)', (row["max(id)"], data))
+
                     conn.commit()
                     conn.close()
                     #os.remove('anh\%s.png' % (row["max(id)"]))
