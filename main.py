@@ -11,7 +11,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 import cv2
 import sys
-import keyboard
+#import keyboard
 import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
@@ -603,6 +603,9 @@ class tehseencode(QDialog):
                     cur = conn.cursor()
                     cur.execute("SELECT max(id) FROM member")
                     rows = cur.fetchall()
+                    directory = "anh/"
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
                     for row in rows:
                         print("%s" % (row["max(id)"]))
                     cv2.imwrite('anh\%s.png' % ("a" + str(row["max(id)"]) + str(self.value)), frame1)
