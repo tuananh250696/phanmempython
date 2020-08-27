@@ -3,8 +3,7 @@ import sqlite3
 import tkinter as tk
 import tkinter.messagebox
 import datetime
-import math
-import time
+from datetime import date
 import os
 import random
 from tkinter import ttk
@@ -24,7 +23,7 @@ import win32ui
 from PIL import Image, ImageWin
 import win32con
 # date
-date = datetime.datetime.now().date()
+today = date.today()
 # temporary lists like sessions
 products_list = []
 product_price = []
@@ -56,7 +55,7 @@ class Application:
         self.left.pack(side=LEFT)
 
         # components
-        self.date_l = Label(self.left, text="Today's Date: " + str(date), font=('arial 16 bold'), bg='lightblue',
+        self.date_l = Label(self.left, text="Today's Date: " + str(today.day)+"-" + str(today.month)+"-" + str(today.year), font=('arial 16 bold'), bg='lightblue',
                             fg='white')
         self.date_l.place(x=20, y=0)
 
@@ -281,8 +280,8 @@ class Application:
     def database_print(self, *args, **kwargs):
 
         namepk = self.adr2_p.get()
-        name_dt = self.n2_p.get()
-        address_pk = self.doctor_p.get()
+        name_dt = self.doctor_p.get()
+        address_pk =  self.n2_p.get()
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
 
@@ -545,6 +544,7 @@ class Application:
         hDC.StartDoc(file_name)
         hDC.StartPage()
 
+
         dib = ImageWin.Dib(bmp)
         dib1 = ImageWin.Dib(bmp1)
         dib2 = ImageWin.Dib(bmp2)
@@ -557,30 +557,71 @@ class Application:
         y1 = int((printer_size[1] - scaled_height) / 2)
         x2 = x1 + scaled_width
         y2 = y1 + scaled_height
-        dib.draw(hDC.GetHandleOutput(), (0, 1400, 1450, 2400))
-        dib1.draw(hDC.GetHandleOutput(), (1470, 1400,2920, 2400))
-        dib2.draw(hDC.GetHandleOutput(), (2940, 1400,4390, 2400))
-        dib3.draw(hDC.GetHandleOutput(), (0, 2800, 1450, 3800))
-        dib4.draw(hDC.GetHandleOutput(), (1470, 2800, 2920, 3800))
-        dib5.draw(hDC.GetHandleOutput(), (2940, 2800, 4390, 3800))
+        dib.draw(hDC.GetHandleOutput(), (0, 1900, 1500, 2900))
+        dib1.draw(hDC.GetHandleOutput(), (1520, 1900,3020, 2900))
+        dib2.draw(hDC.GetHandleOutput(), (3040, 1900,4590, 2900))
+        dib3.draw(hDC.GetHandleOutput(), (0, 3250, 1500, 4250))
+        dib4.draw(hDC.GetHandleOutput(), (1520, 3250, 3020, 4250))
+        dib5.draw(hDC.GetHandleOutput(), (3040, 3250, 4590, 4250))
+
+
+
+        fontdata = {'name': 'Arial', 'height': 150, 'italic': True, 'weight': 150}
+        font = win32ui.CreateFont(fontdata);
+
+        fontdata1 = {'name': 'Arial', 'height': 100, 'italic': True, 'weight': 80}
+        font1 = win32ui.CreateFont(fontdata1);
+
+        fontdata2 = {'name': 'Arial', 'height': 120, 'italic': 0, 'weight': 120}
+        font2 = win32ui.CreateFont(fontdata2);
+
 
         cur2 = conn.cursor()
         cur2.execute("SELECT name_pk FROM print_dt")
         cur3 = conn.cursor()
-        cur3.execute("SELECT name_pk FROM print_dt")
+        cur3.execute("SELECT address FROM print_dt")
+        cur4 = conn.cursor()
+        cur4.execute("SELECT dt_name FROM print_dt")
+        rows4 = cur4.fetchall()
+        rows3 = cur3.fetchall()
         rows2 = cur2.fetchall()
         for row2 in rows2:
              print("%s" % (row2["name_pk"]))
 
+        for row3 in rows3:
+             print("%s" % (row3["address"]))
 
-        hDC.SetMapMode(win32con.MM_TWIPS)
-        company = "\t\t\t\t test machine printPvt8888888888888 trtrtrtrrrrrrrrrrrrrt. Ltd.\n"
-        address = "\t\t\t\ttest2, rrrrrrrrrrrrrrr        rrrrrr8rrrrrrrrrrrrrrtbgbgbgb\n"
-        phone = "\t\t\t\t\t9999555555555555555555555556666666666688888889999999\n"
-        sample = "\t\t\t\t\tInvoice\n"
-        hDC.DrawText(company + address + phone + sample, (0, INCH * -8, INCH * 8, INCH * -9),5)
+        for row4 in rows4:
+             print("%s" % (row4["dt_name"]))
 
-        hDC.DrawText(row2["name_pk"], (0, INCH * -1, INCH * 8, INCH * -2),5)
+        hDC.SelectObject(font)
+        hDC.TextOut(600, 30,row2["name_pk"])
+
+        hDC.SelectObject(font2)
+        hDC.TextOut(1800, 250, "BS: " + row4["dt_name"])
+        hDC.TextOut(1500, 400, "KỸ THUẬT VIÊN: ")
+        hDC.TextOut(1000, 830, "PHIẾU KHÁM NỘI SOI TAI - MŨI - HỌNG")
+        hDC.TextOut(1800, 1730, "HÌNH ẢNH NỘI SOI")
+        hDC.TextOut(1700, 4600, "MÔ TẢ KẾT QUẢ NỘI SOI")
+        hDC.TextOut(500, 4800, "Mô tả :")
+        hDC.TextOut(500, 5000, "Chẩn đoán :")
+        hDC.TextOut(500, 5200, "Chỉ định  :")
+        hDC.TextOut(2800, 5500, " Ngày "+ str(today.day)+" Tháng "+str(today.month)+" Năm "+str(today.year))
+
+
+        hDC.SelectObject(font1)
+        hDC.TextOut(800,550, "Địa chỉ :" + row3["address"])
+        hDC.TextOut(3000, 6000, "Bác sĩ :" + row4["dt_name"])
+        hDC.TextOut(1600, 1000, "Số phiếu :")
+        hDC.TextOut(200, 1200, "Tên bệnh nhân:")
+        hDC.TextOut(200, 1350, "Địa chỉ :" )
+        hDC.TextOut(200, 1500, "Triệu chứng :" )
+        hDC.TextOut(2000, 1200, "Tuổi :" )
+        hDC.TextOut(2000, 1350, "Tel :")
+        hDC.TextOut(2000, 1500, "Giới tính :")
+        hDC.TextOut(3200, 1200, "Nghề nghiệp :")
+        hDC.TextOut(3200, 1350, "Số bảo hiểm :")
+
 
         hDC.EndPage()
         hDC.EndDoc()
