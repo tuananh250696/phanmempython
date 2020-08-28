@@ -20,7 +20,9 @@ from PyQt5.uic import loadUi
 import imutils
 import win32print
 import win32ui
+import shutil
 from PIL import Image, ImageWin
+
 import win32con
 # date
 today = date.today()
@@ -130,13 +132,17 @@ class Application:
         self.bt_save_file = Button(self.right, text="Làm mới", width=15, height=2, font=('arial 12 bold'), bg='white',command=self.delete_text)
         self.bt_save_file.place(x=320, y=0)
         #
-        self.bt_delele1 = Button(self.right, text="Xóa", width=15, height=2, font=('arial 12 bold'), bg='white',
-                                 command=self.Deletedata)
+        self.bt_delele1 = Button(self.right, text="Xóa", width=15, height=2, font=('arial 12 bold'), bg='white',command=self.Deletedata)
+                                 #command=self.Deletedata)
         self.bt_delele1.place(x=480, y=0)
         #
         self.bt_thoat = Button(self.right, text="Đóng", width=15, height=2, font=('arial 12 bold'), bg='white',
                                command=self.add_to_cart)
+
         self.bt_thoat.place(x=640, y=0)
+        self.bt_thoat = Button(self.right, text="Khôi phục cài đặt gốc", width=18, height=2, font=('arial 12 bold'), bg='white',
+                               command=self.Deletealldata)
+        self.bt_thoat.place(x=800, y=0)
 
         self.tenbenhnhan = Label(self.bottom, text="Tên bệnh nhân:", font=('arial 12 bold'), fg='black', bg='lightblue')
         self.tenbenhnhan.place(x=15, y=5)
@@ -234,57 +240,26 @@ class Application:
         self.tree.heading('Address', text="Address", anchor=W)
         self.tree.heading('Age', text="Age", anchor=W)
 
+
     def Deletedata(self):
+
         conn = sqlite3.connect("db_member.db")
-        cur = conn.cursor()
+        cursor = conn.cursor()
         for selected_item in self.tree.selection():
             print(selected_item)  # it prints the selected row id
-            cur.execute("DELETE FROM member WHERE id=?", (self.tree.set(selected_item, '#1'),))
-            conn.commit()
-
-        cur.execute("SELECT * FROM `member` WHERE id=?", (self.tree.set(selected_item, '#1'),))
-        rows = cur.fetchall()
-        for row in rows:
-            print("%s" % (row["id"]))
-        self.tree.delete(selected_item)
-
-        file_name = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
-       # os.remove('anh/%s.png' % ("a46a1"))
-        os.remove('anh/%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
-        # os.remove("a" + str(row["id"]) + "a"+str(3) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(4) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(5) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(6) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(7) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(8) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(9) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(10) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(11) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(12) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(13) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(14) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(15) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(16) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(17) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(18) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(19) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(20) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(21) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(22) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(23) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(24) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(25) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(26) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(27) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(28) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(29) +".png")
-        # os.remove("a" + str(row["id"]) + "a"+str(30) +".png")
-
+            cursor.execute("DELETE FROM member WHERE id=?", (self.tree.set(selected_item, '#1'),))
+            self.tree.delete(selected_item)
         conn.commit()
-        cur.close()
+        conn.close()
 
 
-            #"a" + str(row["id"]) + "a" + str(1)
+    def Deletealldata(self):
+        shutil.rmtree("anh")
+        conn = sqlite3.connect("db_member.db")
+        cur = conn.cursor()
+        sql = 'DELETE FROM member'
+        cur.execute(sql)
+        conn.commit()
 
     def get_itemsdatabase(self, *args, **kwargs):
 
@@ -577,9 +552,9 @@ class Application:
         file_name = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
         file_name1 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(2)))
         file_name2 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(3)))
-        file_name3 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
-        file_name4 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(2)))
-        file_name5 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(3)))
+        file_name3 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(4)))
+        file_name4 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(5)))
+        file_name5 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(6)))
 
         hDC = win32ui.CreateDC()
         hDC.CreatePrinterDC(printer_name)
@@ -789,9 +764,9 @@ class tehseencode(QDialog):
         file_name = ('anh\%s.png' % ("a" +  str(row["max(id)"]) + "a" +str(1)))
         file_name1 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(2)))
         file_name2 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(3)))
-        file_name3 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(1)))
-        file_name4 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(2)))
-        file_name5 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(3)))
+        file_name3 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(4)))
+        file_name4 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(5)))
+        file_name5 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(6)))
 
         hDC = win32ui.CreateDC()
         hDC.CreatePrinterDC(printer_name)
