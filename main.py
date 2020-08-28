@@ -124,7 +124,7 @@ class Application:
         self.bt_add_patient.place(x=0, y=0)
 
         self.bt_open_file = Button(self.right, text="Mở hồ sơ", width=15, height=2, font=('arial 12 bold'), bg='white',
-                                   command=self.generate_bill)
+                                   command=self.generate_bill2)
         self.bt_open_file.place(x=160, y=0)
         #
         self.bt_save_file = Button(self.right, text="Làm mới", width=15, height=2, font=('arial 12 bold'), bg='white',command=self.delete_text)
@@ -236,15 +236,55 @@ class Application:
 
     def Deletedata(self):
         conn = sqlite3.connect("db_member.db")
-        cursor = conn.cursor()
+        cur = conn.cursor()
         for selected_item in self.tree.selection():
             print(selected_item)  # it prints the selected row id
-            cursor.execute("DELETE FROM member WHERE Id=?", (self.tree.set(selected_item, '#1'),))
+            cur.execute("DELETE FROM member WHERE id=?", (self.tree.set(selected_item, '#1'),))
             conn.commit()
-            self.tree.delete(selected_item)
-        conn.commit()
-        cursor.close()
 
+        cur.execute("SELECT * FROM `member` WHERE id=?", (self.tree.set(selected_item, '#1'),))
+        rows = cur.fetchall()
+        for row in rows:
+            print("%s" % (row["id"]))
+        self.tree.delete(selected_item)
+
+        file_name = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
+       # os.remove('anh/%s.png' % ("a46a1"))
+        os.remove('anh/%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
+        # os.remove("a" + str(row["id"]) + "a"+str(3) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(4) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(5) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(6) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(7) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(8) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(9) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(10) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(11) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(12) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(13) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(14) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(15) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(16) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(17) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(18) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(19) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(20) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(21) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(22) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(23) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(24) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(25) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(26) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(27) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(28) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(29) +".png")
+        # os.remove("a" + str(row["id"]) + "a"+str(30) +".png")
+
+        conn.commit()
+        cur.close()
+
+
+            #"a" + str(row["id"]) + "a" + str(1)
 
     def get_itemsdatabase(self, *args, **kwargs):
 
@@ -252,14 +292,14 @@ class Application:
         cursor = conn.cursor()
 
         if self.name_p.get()== '' or self.adr_p.get()== '' or self.y_b.get() == '' or self.jobw.get()== '' or self.stom.get()== '' or self.nbh.get() == '' or c.get() == '':
-            tkinter.messagebox.showinfo("Error", "Please Fill all the entries.")
+            tkinter.messagebox.showinfo("Error", "Điền đầy đủ thông tin.")
         else:
 
             cursor.execute('INSERT INTO member (name, address, age, job, symptom,sbh,sex ) VALUES(?,?,?,?,?,?,?)',(self.name_p.get(),self.adr_p.get(), self.y_b.get(),self.jobw.get(), self.stom.get(), self.nbh.get(),c.get()))
             conn.commit()
             # textbox insert
             #tkinter.messagebox.showinfo("Success", "Successfully added to the database")
-            self.openFrame()
+            self.openFrame1()
 
 
     def add_to_cart(self, *args, **kwargs):
@@ -393,7 +433,7 @@ class Application:
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
         if nameadd22 == '' or name_dt22 ==  '':
-            tkinter.messagebox.showinfo("Error", "Please Fill all the entries.")
+            tkinter.messagebox.showinfo("Error", "điền đầy đủ thông tin!.")
 
         else:
             cursor.execute('CREATE TABLE IF NOT EXISTS print_dt22 (name_pk22 TEXT,dt_name22 TEXT)')
@@ -491,7 +531,19 @@ class Application:
 
     # ----------------------------------------------------------------------
     def openFrame(self):
+        window = tehseencode()
+        window.show()
+        subFrame = QDialog.tehseencode()
+
+    def openFrame1(self):
         #self.hide()
+        self.name_p.delete(0, END)
+        self.adr_p.delete(0, END)
+        self.y_b.delete(0, END)
+        self.jobw.delete(0, END)
+        self.stom.delete(0, END)
+        self.nbh.delete(0, END)
+
         window = tehseencode()
         window.show()
         subFrame = QDialog.tehseencode()
@@ -499,7 +551,222 @@ class Application:
     def show(self):
         root.update()
         root.deiconify()
-  #https://www.youtube.com/watch?v=VvM-uAp9zW8
+
+    def generate_bill2(self, *args, **kwargs):
+
+        conn = sqlite3.connect("db_member.db")
+        conn.row_factory = sqlite3.Row
+
+        for selected_item in self.tree.selection():
+            print(selected_item)
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM `member` WHERE id=?", (self.tree.set(selected_item, '#1'),))
+        rows = cur.fetchall()
+        for row in rows:
+             print("%s" % (row["id"]))
+        HORZRES = 8
+        VERTRES = 10
+        LOGPIXELSX = 88
+        LOGPIXELSY = 90
+        PHYSICALWIDTH = 110
+        PHYSICALHEIGHT = 111
+        PHYSICALOFFSETX = 112
+        PHYSICALOFFSETY = 113
+        INCH = 1440
+        printer_name = win32print.GetDefaultPrinter()
+        file_name = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
+        file_name1 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(2)))
+        file_name2 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(3)))
+        file_name3 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(1)))
+        file_name4 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(2)))
+        file_name5 = ('anh\%s.png' % ("a" + str(row["id"]) + "a" + str(3)))
+
+        hDC = win32ui.CreateDC()
+        hDC.CreatePrinterDC(printer_name)
+        printable_area = hDC.GetDeviceCaps(HORZRES), hDC.GetDeviceCaps(VERTRES)
+        printer_size = hDC.GetDeviceCaps(PHYSICALWIDTH), hDC.GetDeviceCaps(PHYSICALHEIGHT)
+        printer_margins = hDC.GetDeviceCaps(PHYSICALOFFSETX), hDC.GetDeviceCaps(PHYSICALOFFSETY)
+        bmp = Image.open(file_name)
+        bmp1 = Image.open(file_name1)
+        bmp2 = Image.open(file_name2)
+        bmp3 = Image.open(file_name3)
+        bmp4 = Image.open(file_name4)
+        bmp5 = Image.open(file_name5)
+
+        ratios = [1.0 * printable_area[0] / bmp.size[0], 1.0 * printable_area[1] / bmp.size[1]]
+        scale = min(ratios)
+        hDC.StartDoc(file_name)
+        hDC.StartPage()
+
+        dib = ImageWin.Dib(bmp)
+        dib1 = ImageWin.Dib(bmp1)
+        dib2 = ImageWin.Dib(bmp2)
+        dib3 = ImageWin.Dib(bmp3)
+        dib4 = ImageWin.Dib(bmp4)
+        dib5 = ImageWin.Dib(bmp5)
+        scaled_width, scaled_height = [int(scale * i) for i in bmp.size]
+        # scaled_width, scaled_height = [int(scale * i) for i in bmp1.size]
+        x1 = int((printer_size[0] - scaled_width) / 2)
+        y1 = int((printer_size[1] - scaled_height) / 2)
+        x2 = x1 + scaled_width
+        y2 = y1 + scaled_height
+        dib.draw(hDC.GetHandleOutput(), (0, 1900, 1500, 2900))
+        dib1.draw(hDC.GetHandleOutput(), (1520, 1900, 3020, 2900))
+        dib2.draw(hDC.GetHandleOutput(), (3040, 1900, 4590, 2900))
+        dib3.draw(hDC.GetHandleOutput(), (0, 3250, 1500, 4250))
+        dib4.draw(hDC.GetHandleOutput(), (1520, 3250, 3020, 4250))
+        dib5.draw(hDC.GetHandleOutput(), (3040, 3250, 4590, 4250))
+
+        fontdata = {'name': 'Arial', 'height': 150, 'italic': True, 'weight': 150}
+        font = win32ui.CreateFont(fontdata);
+
+        fontdata1 = {'name': 'Arial', 'height': 100, 'italic': True, 'weight': 80}
+        font1 = win32ui.CreateFont(fontdata1);
+
+        fontdata2 = {'name': 'Arial', 'height': 120, 'italic': 0, 'weight': 120}
+        font2 = win32ui.CreateFont(fontdata2);
+
+        cur2 = conn.cursor()
+        cur2.execute("SELECT name_pk FROM print_dt")
+        cur3 = conn.cursor()
+        cur3.execute("SELECT address FROM print_dt")
+        cur4 = conn.cursor()
+        cur4.execute("SELECT dt_name FROM print_dt")
+        cur5 = conn.cursor()
+        cur5.execute("SELECT * FROM `member`")
+
+        rows5 = cur5.fetchall()
+        rows4 = cur4.fetchall()
+        rows3 = cur3.fetchall()
+        rows2 = cur2.fetchall()
+
+        for row5 in rows5:
+            print("%s" % (row5[1]))
+        for row2 in rows2:
+            print("%s" % (row2["name_pk"]))
+
+        for row3 in rows3:
+            print("%s" % (row3["address"]))
+
+        for row4 in rows4:
+            print("%s" % (row4["dt_name"]))
+
+        hDC.SelectObject(font)
+        hDC.TextOut(600, 30, row2["name_pk"])
+
+        hDC.SelectObject(font2)
+        hDC.TextOut(1800, 250, "BS: " + row4["dt_name"])
+        hDC.TextOut(1500, 400, "KỸ THUẬT VIÊN: ")
+        hDC.TextOut(1000, 830, "PHIẾU KHÁM NỘI SOI TAI - MŨI - HỌNG")
+        hDC.TextOut(1800, 1730, "HÌNH ẢNH NỘI SOI")
+        hDC.TextOut(1700, 4600, "MÔ TẢ KẾT QUẢ NỘI SOI")
+        hDC.TextOut(500, 4800, "Mô tả :")
+        hDC.TextOut(500, 5000, "Chẩn đoán :")
+        hDC.TextOut(500, 5200, "Chỉ định  :")
+        hDC.TextOut(2800, 5500, " Ngày " + str(today.day) + " Tháng " + str(today.month) + " Năm " + str(today.year))
+
+        hDC.SelectObject(font1)
+        hDC.TextOut(800, 550, "Địa chỉ :" + row3["address"])
+        hDC.TextOut(3000, 6000, "Bác sĩ :" + row4["dt_name"])
+        hDC.TextOut(1600, 1000, "Số phiếu : " + str(row[0]))
+        hDC.TextOut(200, 1200, "Tên bệnh nhân:" + row[1])
+        hDC.TextOut(200, 1350, "Địa chỉ :" + row[3])
+        hDC.TextOut(200, 1500, "Triệu chứng :" + row[5])
+        hDC.TextOut(2000, 1200, "Tuổi :" + row[4])
+        hDC.TextOut(2000, 1350, "Tel :")
+        hDC.TextOut(2000, 1500, "Giới tính :" + row[6])
+        hDC.TextOut(3200, 1200, "Nghề nghiệp :" + row[2])
+        hDC.TextOut(3200, 1350, "Số bảo hiểm :" + row[7])
+
+        hDC.EndPage()
+        hDC.EndDoc()
+        hDC.DeleteDC()
+
+        # os.remove('t2.jpg')
+        conn.commit()
+        cur.close()
+
+class tehseencode(QDialog):
+    def __init__(self):
+        super(tehseencode, self).__init__()
+        loadUi("untitled2.ui", self)
+        self.logic = 0
+        self.value = 0
+        self.SHOW.clicked.connect(self.onClicked)
+        self.TEXT.setText("Kindly Press 'Show' to connect with webcam.")
+        self.CAPTURE.clicked.connect(self.CaptureClicked)
+        self.CAPTURE_2.clicked.connect(self.f2vrec)
+        self.CAPTURE_2.clicked.connect(self.f2vrec)
+        self.NEXT_3.clicked.connect(self.generate_bill)
+        self.NEXT_7.clicked.connect(self.onClose)
+    @pyqtSlot()
+
+    def onClicked(self):
+
+        self.TEXT.setText('Kindly Press "Capture Image " to Capture image')
+        cap = cv2.VideoCapture(0)
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        op = cv2.VideoWriter('Sample1.avi', fourcc, 11.0, (800, 600))
+        while (cap.isOpened()):
+            ret, frame = cap.read()
+            frame = imutils.resize(frame, width=800, height=600)
+            frame1 = imutils.resize(frame, width=200, height=150)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            if ret == True:
+               # print('here')
+                self.displayImage(frame, 1)
+                cv2.waitKey()
+                if (self.logic == 2):
+                    self.value = self.value+1
+                    conn = sqlite3.connect("db_member.db")
+                    conn.row_factory = sqlite3.Row
+                    cur = conn.cursor()
+                    cur.execute("SELECT max(id) FROM member")
+                    rows = cur.fetchall()
+                    directory = "anh/"
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
+                    for row in rows:
+                        print("%s" % (row["max(id)"]))
+                    cv2.imwrite('anh\%s.png' % ("a" + str(row["max(id)"])+ "a"  + str(self.value)), frame1)
+                    self.TEXT.setText('your Image have been Saved')
+
+                    conn.commit()
+                    conn.close()
+                    #os.remove('anh\%s.png' % (row["max(id)"]))
+                    self.logic = 1
+                if (self.logic == 3):
+                    op.write(frame)
+                if (self.logic == 4):
+                    cap.release()
+                    conn.close()
+                    break
+
+            else:
+                print('not found')
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def CaptureClicked(self):
+        self.logic = 2
+    def displayImage(self, img, window=1):
+        qformat = QImage.Format_Indexed8
+        if len(img.shape) == 3:
+            if (img.shape[2]) == 4:
+                qformat = QImage.Format_RGBA888
+            else:
+                qformat = QImage.Format_RGB888
+        img = QImage(img, img.shape[1], img.shape[0], qformat)
+        img = img.rgbSwapped()
+        self.imgLabel.setPixmap(QPixmap.fromImage(img))
+        self.imgLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignLeft)
+
+    def f2vrec(self):
+        self.logic = 3
+
+    def onClose(self):
+        self.destroy()
+        self.logic = 4
     def generate_bill(self, *args, **kwargs):
         conn = sqlite3.connect("db_member.db")
         conn.row_factory = sqlite3.Row
@@ -508,7 +775,6 @@ class Application:
         rows = cur.fetchall()
         for row in rows:
              print("%s" % (row["max(id)"]))
-
 
         HORZRES = 8
         VERTRES = 10
@@ -582,9 +848,20 @@ class Application:
         cur3.execute("SELECT address FROM print_dt")
         cur4 = conn.cursor()
         cur4.execute("SELECT dt_name FROM print_dt")
+        cur5 = conn.cursor()
+        cur5.execute("SELECT * FROM `member`")
+
+        cur6 = conn.cursor()
+        cur6.execute("SELECT id FROM member")
+
+        rows6 = cur6.fetchall()
+        rows5 = cur5.fetchall()
         rows4 = cur4.fetchall()
         rows3 = cur3.fetchall()
         rows2 = cur2.fetchall()
+
+        for row5 in rows5:
+            print("%s" % (row5[1]))
         for row2 in rows2:
              print("%s" % (row2["name_pk"]))
 
@@ -593,6 +870,11 @@ class Application:
 
         for row4 in rows4:
              print("%s" % (row4["dt_name"]))
+
+        for row6 in rows6:
+             print("%s" % (row6["id"]))
+
+
 
         hDC.SelectObject(font)
         hDC.TextOut(600, 30,row2["name_pk"])
@@ -608,19 +890,18 @@ class Application:
         hDC.TextOut(500, 5200, "Chỉ định  :")
         hDC.TextOut(2800, 5500, " Ngày "+ str(today.day)+" Tháng "+str(today.month)+" Năm "+str(today.year))
 
-
         hDC.SelectObject(font1)
         hDC.TextOut(800,550, "Địa chỉ :" + row3["address"])
         hDC.TextOut(3000, 6000, "Bác sĩ :" + row4["dt_name"])
-        hDC.TextOut(1600, 1000, "Số phiếu :")
-        hDC.TextOut(200, 1200, "Tên bệnh nhân:")
-        hDC.TextOut(200, 1350, "Địa chỉ :" )
-        hDC.TextOut(200, 1500, "Triệu chứng :" )
-        hDC.TextOut(2000, 1200, "Tuổi :" )
+        hDC.TextOut(1600, 1000, "Số phiếu : " + str(row5[0]))
+        hDC.TextOut(200, 1200, "Tên bệnh nhân:"  + row5[1])
+        hDC.TextOut(200, 1350, "Địa chỉ :"  + row5[3])
+        hDC.TextOut(200, 1500, "Triệu chứng :" + row5[5] )
+        hDC.TextOut(2000, 1200, "Tuổi :"  + row5[4])
         hDC.TextOut(2000, 1350, "Tel :")
-        hDC.TextOut(2000, 1500, "Giới tính :")
-        hDC.TextOut(3200, 1200, "Nghề nghiệp :")
-        hDC.TextOut(3200, 1350, "Số bảo hiểm :")
+        hDC.TextOut(2000, 1500, "Giới tính :" + row5[6])
+        hDC.TextOut(3200, 1200, "Nghề nghiệp :" + row5[2])
+        hDC.TextOut(3200, 1350, "Số bảo hiểm :" + row5[7])
 
 
         hDC.EndPage()
@@ -630,93 +911,6 @@ class Application:
         #os.remove('t2.jpg')
         conn.commit()
         cur.close()
-        # create the bill before updating to the database.
-        #  directory = "D:/Store Management Software/Invoice/" + str(date) + "/"
-
-
-    #if cv2.waitKey(1) & 0xFF == ord('q'):
-    #    break
-
-class tehseencode(QDialog):
-    def __init__(self):
-        super(tehseencode, self).__init__()
-        loadUi("untitled2.ui", self)
-        self.logic = 0
-        self.value = 0
-        self.SHOW.clicked.connect(self.onClicked)
-        self.TEXT.setText("Kindly Press 'Show' to connect with webcam.")
-        self.CAPTURE.clicked.connect(self.CaptureClicked)
-        self.CAPTURE_2.clicked.connect(self.f2vrec)
-        self.NEXT_7.clicked.connect(self.onClose)
-    @pyqtSlot()
-
-    def onClicked(self):
-
-        self.TEXT.setText('Kindly Press "Capture Image " to Capture image')
-        cap = cv2.VideoCapture(0)
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        op = cv2.VideoWriter('Sample1.avi', fourcc, 11.0, (800, 600))
-        while (cap.isOpened()):
-            ret, frame = cap.read()
-            frame = imutils.resize(frame, width=800, height=600)
-            frame1 = imutils.resize(frame, width=200, height=150)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            if ret == True:
-               # print('here')
-                self.displayImage(frame, 1)
-                cv2.waitKey()
-                if (self.logic == 2):
-                    self.value = self.value+1
-                    conn = sqlite3.connect("db_member.db")
-                    conn.row_factory = sqlite3.Row
-                    cur = conn.cursor()
-                    cur.execute("SELECT max(id) FROM member")
-                    rows = cur.fetchall()
-                    directory = "anh/"
-                    if not os.path.exists(directory):
-                        os.makedirs(directory)
-                    for row in rows:
-                        print("%s" % (row["max(id)"]))
-                    cv2.imwrite('anh\%s.png' % ("a" + str(row["max(id)"])+ "a"  + str(self.value)), frame1)
-                    self.TEXT.setText('your Image have been Saved')
-
-                    conn.commit()
-                    conn.close()
-                    #os.remove('anh\%s.png' % (row["max(id)"]))
-                    self.logic = 1
-                if (self.logic == 3):
-                    op.write(frame)
-                if (self.logic == 4):
-                    cap.release()
-                    conn.close()
-                    break
-
-            else:
-                print('not found')
-        cap.release()
-        cv2.destroyAllWindows()
-
-    def CaptureClicked(self):
-        self.logic = 2
-    def displayImage(self, img, window=1):
-        qformat = QImage.Format_Indexed8
-        if len(img.shape) == 3:
-            if (img.shape[2]) == 4:
-                qformat = QImage.Format_RGBA888
-            else:
-                qformat = QImage.Format_RGB888
-        img = QImage(img, img.shape[1], img.shape[0], qformat)
-        img = img.rgbSwapped()
-        self.imgLabel.setPixmap(QPixmap.fromImage(img))
-        self.imgLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignLeft)
-
-    def f2vrec(self):
-        self.logic = 3
-
-    def onClose(self):
-        self.destroy()
-        self.logic = 4
-
 app = QApplication(sys.argv)
 b = Application(root)
 
