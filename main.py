@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QDialog, QApplication
 from PyQt5.uic import loadUi
 import imutils
 import win32print
+import win32api
 import win32ui
 import shutil
 from PIL import Image, ImageWin
@@ -722,6 +723,18 @@ class tehseencode(QDialog):
         cap.release()
         cv2.destroyAllWindows()
 
+    def displayImage1(self, img1, window=1):
+        qformat = QImage.Format_Indexed8
+        if len(img1.shape) == 3:
+            if (img1.shape[2]) == 4:
+                qformat = QImage.Format_RGBA888
+            else:
+                qformat = QImage.Format_RGB888
+        img1 = QImage(img1, img1.shape[1], img1.shape[0], qformat)
+        img1 = img1.rgbSwapped()
+        self.imgLabel.setPixmap(QPixmap.fromImage(img1))
+        self.imgLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignLeft)
+
     def CaptureClicked(self):
         self.logic = 2
     def displayImage(self, img, window=1):
@@ -896,7 +909,3 @@ try:
     sys.exit(app.exec_())
 except:
     print('excitng')
-
-
-
-
