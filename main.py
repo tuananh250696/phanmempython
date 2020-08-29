@@ -504,7 +504,6 @@ class Application:
 
     def hide(self):
         root.withdraw()
-
     # ----------------------------------------------------------------------
     def openFrame(self):
         window = tehseencode()
@@ -519,7 +518,6 @@ class Application:
         self.jobw.delete(0, END)
         self.stom.delete(0, END)
         self.nbh.delete(0, END)
-
         window = tehseencode()
         window.show()
         subFrame = QDialog.tehseencode()
@@ -640,7 +638,6 @@ class Application:
         hDC.TextOut(500, 5000, "Chẩn đoán :")
         hDC.TextOut(500, 5200, "Chỉ định  :")
         hDC.TextOut(2800, 5500, " Ngày " + str(today.day) + " Tháng " + str(today.month) + " Năm " + str(today.year))
-
         hDC.SelectObject(font1)
         hDC.TextOut(800, 550, "Địa chỉ :" + row3["address"])
         hDC.TextOut(3000, 6000, "Bác sĩ :" + row4["dt_name"])
@@ -653,11 +650,9 @@ class Application:
         hDC.TextOut(2000, 1500, "Giới tính :" + row[6])
         hDC.TextOut(3200, 1200, "Nghề nghiệp :" + row[2])
         hDC.TextOut(3200, 1350, "Số bảo hiểm :" + row[7])
-
         hDC.EndPage()
         hDC.EndDoc()
         hDC.DeleteDC()
-
         # os.remove('t2.jpg')
         conn.commit()
         cur.close()
@@ -763,7 +758,6 @@ class tehseencode(QDialog):
         rows = cur.fetchall()
         for row in rows:
              print("%s" % (row["max(id)"]))
-
         HORZRES = 8
         VERTRES = 10
         LOGPIXELSX = 88
@@ -780,7 +774,6 @@ class tehseencode(QDialog):
         file_name3 = ('anh\%s.png' % ("a" + str(row["max(id)"]) +"a" + str(4)))
         file_name4 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(5)))
         file_name5 = ('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(6)))
-
         hDC = win32ui.CreateDC()
         hDC.CreatePrinterDC(printer_name)
         printable_area = hDC.GetDeviceCaps(HORZRES), hDC.GetDeviceCaps(VERTRES)
@@ -792,12 +785,10 @@ class tehseencode(QDialog):
         bmp3 = Image.open(file_name3)
         bmp4 = Image.open(file_name4)
         bmp5 = Image.open(file_name5)
-
         ratios = [1.0 * printable_area[0] / bmp.size[0], 1.0 * printable_area[1] / bmp.size[1]]
         scale = min(ratios)
         hDC.StartDoc(file_name)
         hDC.StartPage()
-
 
         dib = ImageWin.Dib(bmp)
         dib1 = ImageWin.Dib(bmp1)
@@ -818,8 +809,6 @@ class tehseencode(QDialog):
         dib4.draw(hDC.GetHandleOutput(), (1520, 3250, 3020, 4250))
         dib5.draw(hDC.GetHandleOutput(), (3040, 3250, 4590, 4250))
 
-
-
         fontdata = {'name': 'Arial', 'height': 150, 'italic': True, 'weight': 150}
         font = win32ui.CreateFont(fontdata);
 
@@ -829,7 +818,6 @@ class tehseencode(QDialog):
         fontdata2 = {'name': 'Arial', 'height': 120, 'italic': 0, 'weight': 120}
         font2 = win32ui.CreateFont(fontdata2);
 
-
         cur2 = conn.cursor()
         cur2.execute("SELECT name_pk FROM print_dt")
         cur3 = conn.cursor()
@@ -838,7 +826,6 @@ class tehseencode(QDialog):
         cur4.execute("SELECT dt_name FROM print_dt")
         cur5 = conn.cursor()
         cur5.execute("SELECT * FROM `member`")
-
         cur6 = conn.cursor()
         cur6.execute("SELECT id FROM member")
 
@@ -861,8 +848,6 @@ class tehseencode(QDialog):
 
         for row6 in rows6:
              print("%s" % (row6["id"]))
-
-
 
         hDC.SelectObject(font)
         hDC.TextOut(600, 30,row2["name_pk"])
@@ -890,18 +875,14 @@ class tehseencode(QDialog):
         hDC.TextOut(2000, 1500, "Giới tính :" + row5[6])
         hDC.TextOut(3200, 1200, "Nghề nghiệp :" + row5[2])
         hDC.TextOut(3200, 1350, "Số bảo hiểm :" + row5[7])
-
-
         hDC.EndPage()
         hDC.EndDoc()
         hDC.DeleteDC()
-
         #os.remove('t2.jpg')
         conn.commit()
         cur.close()
 app = QApplication(sys.argv)
 b = Application(root)
-
 root.geometry("1360x786+0+0")
 root.mainloop()
 
@@ -909,3 +890,4 @@ try:
     sys.exit(app.exec_())
 except:
     print('excitng')
+
