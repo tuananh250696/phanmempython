@@ -2,35 +2,26 @@ from tkinter import *
 import sqlite3
 import tkinter as tk
 import tkinter.messagebox
-import datetime
-import math
-import time
+from datetime import date
 import os
-import random
 from tkinter import ttk
-from PIL import ImageTk, Image
 import cv2
 import sys
-import keyboard
-import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QDialog, QApplication
 from PyQt5.uic import loadUi
 import imutils
-import win32print
-import win32ui
-from PIL import Image, ImageWin
-import win32con
+import shutil
+
 # date
-date = datetime.datetime.now().date()
+today = date.today()
 # temporary lists like sessions
 products_list = []
 product_price = []
 product_quantity = []
 product_id = []
-
 # list for labels
 root = Tk()
 root.title("COMPANY BOSSCCOM")
@@ -43,42 +34,42 @@ c = StringVar()
 c1 = StringVar()
 
 
-
 class Application:
     def __init__(self, master, *args, **kwargs):
         self.master = master
         # frame
-        self.left1 = Frame(master, width=1360, height=96, bg='white')
+        self.left1 = Frame(master, width=1024, height=60, bg='white')
         self.left1.pack(side=TOP)
         Label(self.left1, image=img_resize, bg="white", relief=SUNKEN).pack(pady=5)
 
-        self.left = Frame(master, width=320, height=1300, bg='white')
+        self.left = Frame(master, width=260, height=1000, bg='white')
         self.left.pack(side=LEFT)
 
         # components
-        self.date_l = Label(self.left, text="Today's Date: " + str(date), font=('arial 16 bold'), bg='lightblue',
+        self.date_l = Label(self.left,
+                            text="Today's Date: " + str(today.day) + "-" + str(today.month) + "-" + str(today.year),
+                            font=('arial 14 bold'), bg='lightblue',
                             fg='white')
         self.date_l.place(x=20, y=0)
 
         # button
-        self.bt_st_catalog = Button(self.left, text="Hồ sơ bệnh nhân", width=18, height=2, font=('arial 18 bold'),
-                                    bg='orange',command=self.ajax)
+        self.bt_st_catalog = Button(self.left, text="Hồ sơ bệnh nhân", width=15, height=2, font=('arial 18 bold'),
+                                    bg='orange', command=self.ajax)
         self.bt_st_catalog.place(x=8, y=45)
 
-        self.bt_st_form = Button(self.left, text="Nội soi", width=18, height=2, font=('arial 18 bold'), bg='orange',
-                                 command=self.openFrame)
+        self.bt_st_form = Button(self.left, text="Nội soi", width=15, height=2, font=('arial 18 bold'), bg='orange',
+                                 command=self.endoscopy)
         self.bt_st_form.place(x=8, y=135)
 
-        self.bt_patient = Button(self.left, text="Biểu mẫu in", width=18, height=2, font=('arial 18 bold'), bg='orange',
+        self.bt_patient = Button(self.left, text="Biểu mẫu in", width=15, height=2, font=('arial 18 bold'), bg='orange',
                                  command=self.add_to_bn)
         self.bt_patient.place(x=8, y=225)
 
-        self.bt_endoscop = Button(self.left, text="Danh mục khám", width=18, height=2, font=('arial 18 bold'),
+        self.bt_endoscop = Button(self.left, text="Danh mục khám", width=15, height=2, font=('arial 18 bold'),
                                   bg='orange', command=self.createNewWindow)
         self.bt_endoscop.place(x=8, y=315)
 
-
-        self.bt_exit1 = Button(self.left, text="Thoát", width=18, height=2, font=('arial 18 bold'), bg='orange',
+        self.bt_exit1 = Button(self.left, text="Thoát", width=15, height=2, font=('arial 18 bold'), bg='orange',
                                command=self.quit)
         self.bt_exit1.place(x=8, y=405)
 
@@ -87,8 +78,10 @@ class Application:
         self.tree.delete(*self.tree.get_children())
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM `member` WHERE `name` LIKE ? AND `job` LIKE ? AND `address` LIKE ? AND `age` LIKE ?",
-                       ('%'+str(self.name_infos.get())+'%','%'+str(self.from_jobs.get())+'%','%'+str(self.from_addss.get())+'%','%'+str(self.born_agess.get())+'%'))
+        cursor.execute(
+            "SELECT * FROM `member` WHERE `name` LIKE ? AND `job` LIKE ? AND `address` LIKE ? AND `age` LIKE ?",
+            ('%' + str(self.name_infos.get()) + '%', '%' + str(self.from_jobs.get()) + '%',
+             '%' + str(self.from_addss.get()) + '%', '%' + str(self.born_agess.get()) + '%'))
         fetch = cursor.fetchall()
         for data in fetch:
             self.tree.insert('', 'end', values=(data))
@@ -101,7 +94,7 @@ class Application:
 
     def ajax(self, *args, **kwargs):
 
-        self.right = Frame(root, width=1100, height=53, bg='white')
+        self.right = Frame(root, width=1100, height=75, bg='white')
         self.right.pack(side=TOP)
 
         self.bottom = Frame(root, width=1100, height=220, bg='lightblue')
@@ -120,28 +113,34 @@ class Application:
         self.RightForm = Frame(self.MidFrame, width=1100)
         self.RightForm.pack(side=RIGHT)
 
-        self.bt_add_patient = Button(self.right, text="Lưu hồ sơ", width=15, height=2, font=('arial 12 bold'),
-                                     bg='white',command=self.get_itemsdatabase)
+        self.bt_add_patient = Button(self.right, text="Lưu hồ sơ", width=14, height=3, font=('arial 12 bold'),
+                                     bg='white', command=self.get_itemsdatabase)
         self.bt_add_patient.place(x=0, y=0)
 
-        self.bt_open_file = Button(self.right, text="Mở hồ sơ", width=15, height=2, font=('arial 12 bold'), bg='white',
-                                   command=self.generate_bill)
-        self.bt_open_file.place(x=160, y=0)
+        self.bt_open_file = Button(self.right, text="Mở hồ sơ", width=14, height=3, font=('arial 12 bold'), bg='white',
+                                   command=self.generate_bill2)
+        self.bt_open_file.place(x=150, y=0)
         #
-        self.bt_save_file = Button(self.right, text="Làm mới", width=15, height=2, font=('arial 12 bold'), bg='white')
-        self.bt_save_file.place(x=320, y=0)
+        self.bt_save_file = Button(self.right, text="Làm mới", width=14, height=3, font=('arial 12 bold'), bg='white',
+                                   command=self.delete_text)
+        self.bt_save_file.place(x=300, y=0)
         #
-        self.bt_delele1 = Button(self.right, text="Xóa", width=15, height=2, font=('arial 12 bold'), bg='white',
+        self.bt_delele1 = Button(self.right, text="Xóa", width=14, height=3, font=('arial 12 bold'), bg='white',
                                  command=self.Deletedata)
-        self.bt_delele1.place(x=480, y=0)
+        # command=self.Deletedata)
+        self.bt_delele1.place(x=450, y=0)
         #
-        self.bt_thoat = Button(self.right, text="Đóng", width=15, height=2, font=('arial 12 bold'), bg='white',
+        self.bt_thoat = Button(self.right, text="Đóng", width=14, height=3, font=('arial 12 bold'), bg='white',
                                command=self.add_to_cart)
-        self.bt_thoat.place(x=640, y=0)
+
+        self.bt_thoat.place(x=600, y=0)
+        self.bt_thoat = Button(self.right, text="Khôi phục cài đặt gốc", width=14, height=3, font=('arial 12 bold'),
+                               bg='white',
+                               command=self.Deletealldata)
+        self.bt_thoat.place(x=750, y=0)
 
         self.tenbenhnhan = Label(self.bottom, text="Tên bệnh nhân:", font=('arial 12 bold'), fg='black', bg='lightblue')
         self.tenbenhnhan.place(x=15, y=5)
-
 
         self.name_p = Entry(self.bottom, font=('arial 24 bold'), width=20)
         self.name_p.place(x=5, y=30)
@@ -156,7 +155,7 @@ class Application:
         self.year_b = Label(self.bottom, text="Năm sinh:", font=('arial 12 bold'), fg='black', bg='lightblue')
         self.year_b.place(x=15, y=150)
 
-        self.y_b = Entry(self.bottom,  font=('arial 24 bold'), width=20)
+        self.y_b = Entry(self.bottom, font=('arial 24 bold'), width=20)
         self.y_b.place(x=5, y=175)
 
         self.job = Label(self.bottom, text="Nghề nghiệp:", font=('arial 12 bold'), fg='black', bg='lightblue')
@@ -171,19 +170,19 @@ class Application:
 
         self.sbh = Label(self.bottom, text="Số bảo hiểm:", font=('arial 12 bold'), fg='black', bg='lightblue')
         self.sbh.place(x=420, y=150)
-        self.nbh = Entry(self.bottom,font=('arial 24 bold'), width=20)
+        self.nbh = Entry(self.bottom, font=('arial 24 bold'), width=20)
         self.nbh.place(x=410, y=175)
 
-        self.enteride = Entry(self.bottom, width=25, font=('arial 18 bold'), bg='lightblue')
-        self.enteride.place(x=800, y=175)
-        self.enteride.focus()
+        # self.enteride = Entry(self.bottom, width=25, font=('arial 18 bold'), bg='lightblue')
+        # self.enteride.place(x=800, y=175)
+        # self.enteride.focus()
 
         self.droplist = OptionMenu(self.bottom, c, 'NAM', 'NỮ')
         self.droplist.pack()
         self.menu = self.droplist.nametowidget(self.droplist.menuname)
         self.menu.configure(font=('arial 20 bold'))
         c.set('NAM')
-        self.droplist.config(width=10,font=('arial 18 bold'))
+        self.droplist.config(width=10, font=('arial 18 bold'))
         self.droplist.place(x=800, y=30)
 
         self.seachinfo = Button(self.bottom1, text="Tìm kiếm", width=15, height=1, font=('arial 18 bold'), bg='orange',
@@ -193,7 +192,7 @@ class Application:
         self.name_info = Label(self.bottom1, text="Tên:", font=('arial 12 bold'), fg='black', bg='lightblue')
         self.name_info.place(x=5, y=10)
 
-        self.name_infos = Entry(self.bottom1, width=18,  font=('arial 20 bold'), bg='white')
+        self.name_infos = Entry(self.bottom1, width=18, font=('arial 20 bold'), bg='white')
         self.name_infos.place(x=5, y=38)
 
         self.job_s = Label(self.bottom1, text="Nghề nghiệp:", font=('arial 12 bold'), fg='black', bg='lightblue')
@@ -210,8 +209,6 @@ class Application:
         self.born_s2.place(x=650, y=10)
         self.born_agess = Entry(self.bottom1, font=('arial 20 bold'), width=5)
         self.born_agess.place(x=650, y=38)
-
-
 
         self.scrollbarx = Scrollbar(self.RightForm, orient=HORIZONTAL)
         self.scrollbary = Scrollbar(self.RightForm, orient=VERTICAL)
@@ -236,33 +233,39 @@ class Application:
         self.tree.heading('Age', text="Age", anchor=W)
 
     def Deletedata(self):
+
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
         for selected_item in self.tree.selection():
             print(selected_item)  # it prints the selected row id
             cursor.execute("DELETE FROM member WHERE id=?", (self.tree.set(selected_item, '#1'),))
-            conn.commit()
             self.tree.delete(selected_item)
         conn.commit()
-        cursor.close()
+        conn.close()
 
+    def Deletealldata(self):
+        shutil.rmtree("anh")
+        conn = sqlite3.connect("db_member.db")
+        cur = conn.cursor()
+        sql = 'DELETE FROM member'
+        cur.execute(sql)
+        conn.commit()
 
     def get_itemsdatabase(self, *args, **kwargs):
 
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
 
-        if self.name_p.get()== '' or self.adr_p.get()== '' or self.y_b.get() == '' or self.jobw.get()== '' or self.stom.get()== '' or self.nbh.get() == '' or c.get() == '':
-            tkinter.messagebox.showinfo("Error", "Please Fill all the entries.")
+        if self.name_p.get() == '' or self.adr_p.get() == '' or self.y_b.get() == '' or self.jobw.get() == '' or self.stom.get() == '' or self.nbh.get() == '' or c.get() == '':
+            tkinter.messagebox.showinfo("Error", "Điền đầy đủ thông tin.")
         else:
 
-            cursor.execute('INSERT INTO member (name, address, age, job, symptom,sbh,sex ) VALUES(?,?,?,?,?,?,?)',(self.name_p.get(),self.adr_p.get(), self.y_b.get(),self.jobw.get(), self.stom.get(), self.nbh.get(),c.get()))
+            cursor.execute('INSERT INTO member (name, address, age, job, symptom,sbh,sex ) VALUES(?,?,?,?,?,?,?)', (
+            self.name_p.get(), self.adr_p.get(), self.y_b.get(), self.jobw.get(), self.stom.get(), self.nbh.get(),
+            c.get()))
             conn.commit()
             # textbox insert
-            tkinter.messagebox.showinfo("Success", "Successfully added to the database")
-            self.openFrame()
-            conn.commit()
-            cursor.close()
+            # tkinter.messagebox.showinfo("Success", "Successfully added to the database")
 
 
     def add_to_cart(self, *args, **kwargs):
@@ -283,73 +286,129 @@ class Application:
     def database_print(self, *args, **kwargs):
 
         namepk = self.adr2_p.get()
-        name_dt = self.n2_p.get()
+        name_dt = self.doctor_p.get()
         address_pk = self.n2_p.get()
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
-        if namepk== '' or name_dt== '' or address_pk == '':
-            tkinter.messagebox.showinfo("Error", "Please Fill all the entries.")
+
+        if namepk == '' or name_dt == '' or address_pk == '':
+            tkinter.messagebox.showinfo("Error", "Điền đầy đủ thông tin.")
 
         else:
+
+            cursor.execute("DELETE FROM print_dt WHERE id=1")
             cursor.execute('CREATE TABLE IF NOT EXISTS print_dt (name_pk TEXT,dt_name TEXT,address TEXT)')
             cursor.execute('INSERT INTO print_dt (name_pk,dt_name,address) VALUES(?,?,?)',
                            (namepk, name_dt, address_pk))
-            conn.commit()
-            tkinter.messagebox.showinfo("Success", "Successfully added to the database")
+            tkinter.messagebox.showinfo("Success", "Đã thêm thông tin")
             conn.commit()
             cursor.close()
 
     def add_to_bn(self, *args, **kwargs):
         addWindow = Toplevel(root)
         addWindow.title("Set form print")
-        addWindow.geometry("600x350")
-        self.rightadd2 = Frame(addWindow, width=600, height=450, bg='lightblue')
-        self.rightadd2.pack(side=TOP)
+        addWindow.geometry("1200x600")
+        self.rightw2 = Frame(addWindow, width=550, height=600, bg='lightblue')
+        self.rightw2.pack(side=RIGHT)
+        self.rightw3 = Frame(addWindow, width=600, height=600, bg='lightblue')
+        self.rightw3.pack(side=LEFT)
 
-        self.adr2 = Label(self.rightadd2, text="Phòng khám:", font=('arial 16 bold'), fg='black', bg='lightblue')
+        self.adr2 = Label(self.rightw3, text="Phòng khám:", font=('arial 16 bold'), fg='black', bg='lightblue')
         self.adr2.place(x=10, y=10)
-        self.adr2_p = Entry(self.rightadd2, font=('arial 18 bold'), width=32)
+        self.adr2_p = Entry(self.rightw3, font=('arial 18 bold'), width=32)
         self.adr2_p.place(x=150, y=10)
 
-        self.doctor = Label(self.rightadd2, text=" Bác sĩ :", font=('arial 16 bold'), fg='black', bg='lightblue')
+        self.doctor = Label(self.rightw3, text=" Bác sĩ :", font=('arial 16 bold'), fg='black', bg='lightblue')
         self.doctor.place(x=10, y=85)
 
-        self.doctor_p = Entry(self.rightadd2, font=('arial 18 bold'), width=32)
+        self.doctor_p = Entry(self.rightw3, font=('arial 18 bold'), width=32)
         self.doctor_p.place(x=150, y=75)
 
-        self.n2 = Label(self.rightadd2, text="Địa chỉ:", font=('arial 16 bold'), fg='black', bg='lightblue')
+        self.n2 = Label(self.rightw3, text="Địa chỉ:", font=('arial 16 bold'), fg='black', bg='lightblue')
         self.n2.place(x=10, y=150)
 
-        self.n2_p = Entry(self.rightadd2, font=('arial 18 bold'), width=32)
+        self.n2_p = Entry(self.rightw3, font=('arial 18 bold'), width=32)
         self.n2_p.place(x=150, y=150)
 
-        self.add_dt = Button(self.rightadd2, text="Thêm", width=12, height=1, font=('arial 18 bold'), bg='orange',command=self.database_print)
+        self.add_dt = Button(self.rightw3, text="Cập nhật", width=12, height=2, font=('arial 18 bold'), bg='orange',
+                             command=self.database_print)
         self.add_dt.place(x=10, y=260)
 
-        self.add_dl = Button(self.rightadd2, text="Sửa", width=12, height=1, font=('arial 18 bold'), bg='orange',
-                             )
+        self.add_dl = Button(self.rightw3, text="Xóa", width=12, height=2, font=('arial 18 bold'), bg='orange',
+                             command=self.Deletedata_print)
         self.add_dl.place(x=200, y=260)
 
-        self.add_dltd = Button(self.rightadd2, text="Xóa", width=12, height=1, font=('arial 18 bold'), bg='orange',
-                               )
+        self.add_dltd = Button(self.rightw3, text="Đóng", width=12, height=2, font=('arial 18 bold'), bg='orange',
+                               command=self.quit_print2)
         self.add_dltd.place(x=390, y=260)
 
-    def database_print111(self, *args, **kwargs):
+        self.scrollbarx = Scrollbar(self.rightw2, orient=HORIZONTAL)
+        self.scrollbary = Scrollbar(self.rightw2, orient=VERTICAL)
+        self.tree1 = ttk.Treeview(self.rightw2, columns=("Id", "Phòng khám", "Bác sĩ", "Địa chỉ"),
+                                  selectmode="extended",
+                                  height=400, yscrollcommand=self.scrollbary.set, xscrollcommand=self.scrollbarx.set)
+        self.scrollbary.config(command=self.tree1.yview)
+        self.scrollbary.pack(side=RIGHT, fill=Y)
+        self.scrollbarx.config(command=self.tree1.xview)
+        self.scrollbarx.pack(side=BOTTOM, fill=X)
+        self.tree1.column('#0', stretch=NO, minwidth=0, width=0)
+        self.tree1.column('#1', stretch=NO, minwidth=0, width=30)
+        self.tree1.column('#2', stretch=NO, minwidth=0, width=250)
+        self.tree1.column('#3', stretch=NO, minwidth=0, width=150)
+        self.tree1.column('#4', stretch=NO, minwidth=0, width=150)
 
+        self.tree1.pack()
+        self.tree1.heading('Id', text="Id", anchor=W)
+        self.tree1.heading('Phòng khám', text="Phòng khám", anchor=W)
+        self.tree1.heading('Bác sĩ', text="Bác sĩ", anchor=W)
+        self.tree1.heading('Địa chỉ', text="Địa chỉ", anchor=W)
+        self.tree1.pack()
+
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM `print_dt`")
+        fetch = cursor.fetchall()
+        for data in fetch:
+            self.tree1.insert('', 'end', values=(data))
+        cursor.close()
+        conn.close()
+
+    def Deletedata_print(self):
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        for selected_item1 in self.tree1.selection():
+            print(selected_item1)  # it prints the selected row id
+            cursor.execute("DELETE FROM print_dt WHERE id=?", (self.tree1.set(selected_item1, '#1'),))
+            conn.commit()
+            self.tree1.delete(selected_item1)
+        conn.commit()
+        cursor.close()
+
+    def Chosedata_print(self):
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        for selected_item1 in self.tree1.selection():
+            print(selected_item1)  # it prints the selected row id
+            cursor.execute("DELETE FROM print_dt WHERE id=?", (self.tree1.set(selected_item1, '#1'),))
+            conn.commit()
+            self.tree1.delete(selected_item1)
+        conn.commit()
+        cursor.close()
+
+    def database_print111(self, *args, **kwargs):
         nameadd22 = c1.get()
         name_dt22 = self.ad_if2.get()
 
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
-        if nameadd22 == '' or name_dt22 ==  '':
-            tkinter.messagebox.showinfo("Error", "Please Fill all the entries.")
+        if nameadd22 == '' or name_dt22 == '':
+            tkinter.messagebox.showinfo("Error", "điền đầy đủ thông tin!.")
 
         else:
             cursor.execute('CREATE TABLE IF NOT EXISTS print_dt22 (name_pk22 TEXT,dt_name22 TEXT)')
             cursor.execute('INSERT INTO print_dt22 (name_pk22,dt_name22) VALUES(?,?)',
                            (nameadd22, name_dt22))
-            conn.commit()
-            tkinter.messagebox.showinfo("Success", "Successfully added to the database")
+            tkinter.messagebox.showinfo("Success", "Đã thêm thông tin")
             conn.commit()
             cursor.close()
 
@@ -372,282 +431,181 @@ class Application:
         self.n4 = Label(self.rightw3, text="Danh Mục:", font=('arial 14 bold'), fg='black', bg='lightblue')
         self.n4.place(x=10, y=90)
 
-        self.droplist = OptionMenu(self.rightw3,c1, 'TAI', 'MŨI','HỌNG')
+        self.droplist = OptionMenu(self.rightw3, c1, 'TAI', 'MŨI', 'HỌNG')
         self.droplist.pack()
 
         self.menu = self.droplist.nametowidget(self.droplist.menuname)
         self.menu.configure(font=('arial 28 bold'))
         c1.set('HỌNG')
 
-        self.droplist.config(width=16,height=2,font=('arial 18 bold'))
+        self.droplist.config(width=16, height=2, font=('arial 18 bold'))
         self.droplist.place(x=5, y=120)
 
-        self.add_ifmt = Button(self.rightw3,text="Thêm", width=14, height=2, font=('arial 20 bold'), bg='orange',command=self.database_print111)
+        self.add_ifmt = Button(self.rightw3, text="Cập nhật", width=14, height=2, font=('arial 20 bold'), bg='orange',
+                               command=self.database_print111)
         self.add_ifmt.place(x=5, y=200)
 
-        self.add_dltifmt = Button(self.rightw3, text="Lưu", width=14, height=2, font=('arial 20 bold'),
-                                  bg='orange')
+        self.add_dltifmt = Button(self.rightw3, text="Xóa", width=14, height=2, font=('arial 20 bold'),
+                                  bg='orange', command=self.Deletedata_NewWindow)
         self.add_dltifmt.place(x=5, y=300)
 
-        self.add_dltd = Button(self.rightw3, text="Xóa", width=14, height=2, font=('arial 20 bold'),
-                               bg='orange')
+        self.add_dltd = Button(self.rightw3, text="Đóng", width=14, height=2, font=('arial 20 bold'),
+                               bg='orange', command=self.quit_print1)
         self.add_dltd.place(x=5, y=400)
         scrollbary = Scrollbar(self.rightw2, orient=VERTICAL)
         scrollbarx = Scrollbar(self.rightw2, orient=HORIZONTAL)
-        tree = ttk.Treeview(self.rightw2, columns=("Diagnostic", "Firstname"),
-                            selectmode="extended", height=500, yscrollcommand=scrollbary.set,
-                            xscrollcommand=scrollbarx.set)
-        scrollbary.config(command=tree.yview)
+        self.tree2 = ttk.Treeview(self.rightw2, columns=("Diagnostic", "Firstname"),
+                                  selectmode="extended", height=500, yscrollcommand=scrollbary.set,
+                                  xscrollcommand=scrollbarx.set)
+        scrollbary.config(command=self.tree2.yview)
         scrollbary.pack(side=RIGHT, fill=Y)
-        scrollbarx.config(command=tree.xview)
+        scrollbarx.config(command=self.tree2.xview)
         scrollbarx.pack(side=BOTTOM, fill=X)
-        tree.heading('Diagnostic', text="Diagnostic", anchor=W)
-        tree.heading('Firstname', text="Firstname", anchor=W)
-        tree.column('#0', stretch=NO, minwidth=0, width=0)
-        tree.column('#1', stretch=NO, minwidth=0, width=200)
-        tree.column('#2', stretch=NO, minwidth=0, width=300)
-        tree.pack()
+        self.tree2.heading('Diagnostic', text="Diagnostic", anchor=W)
+        self.tree2.heading('Firstname', text="Firstname", anchor=W)
+        self.tree2.column('#0', stretch=NO, minwidth=0, width=0)
+        self.tree2.column('#1', stretch=NO, minwidth=0, width=200)
+        self.tree2.column('#2', stretch=NO, minwidth=0, width=300)
+        self.tree2.pack()
 
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM `print_dt22`")
         fetch = cursor.fetchall()
         for data in fetch:
-            tree.insert('', 'end', values=(data))
+            self.tree2.insert('', 'end', values=(data))
         cursor.close()
         conn.close()
 
-
+    def Deletedata_NewWindow(self):
+        conn = sqlite3.connect("db_member.db")
+        cursor = conn.cursor()
+        for selected_item1 in self.tree2.selection():
+            print(selected_item1)  # it prints the selected row id
+            cursor.execute("DELETE FROM print_dt22 WHERE name_pk22=?", (self.tree2.set(selected_item1, '#1'),))
+            conn.commit()
+            self.tree2.delete(selected_item1)
+        conn.commit()
+        cursor.close()
 
     def quit(self):
+        root.withdraw()
         root.destroy()
+
+    def quit_print1(self):
+        tkinter.messagebox.showinfo("Success", "Thoát cài đặt danh mục")
+
+    def quit_print2(self):
+        tkinter.messagebox.showinfo("Success", "Thoát cài đặt biểu mẫu")
 
     def hide(self):
         root.withdraw()
 
-    # ----------------------------------------------------------------------
-    def openFrame(self):
-        #self.hide()
-        window = tehseencode()
-        window.show()
-        subFrame = QDialog.tehseencode()
-    # ----------------------------------------------------------------------
     def show(self):
         root.update()
         root.deiconify()
-  #https://www.youtube.com/watch?v=VvM-uAp9zW8
-    def generate_bill(self, *args, **kwargs):
-        conn = sqlite3.connect("db_member.db")
-        cur = conn.cursor()
-        m= cur.execute("SELECT * FROM new_employee")
-        for x in m:
-            self.rec_data = x[2]
-        with open('t2.jpg','wb')as f:
-            f.write(self.rec_data)
-        HORZRES = 8
-        VERTRES = 10
-        LOGPIXELSX = 88
-        LOGPIXELSY = 90
-        PHYSICALWIDTH = 110
-        PHYSICALHEIGHT = 111
-        PHYSICALOFFSETX = 112
-        PHYSICALOFFSETY = 113
-        INCH = 1440
-        printer_name = win32print.GetDefaultPrinter()
-        file_name = 't2.jpg'
-        hDC = win32ui.CreateDC()
-        hDC.CreatePrinterDC(printer_name)
-        printable_area = hDC.GetDeviceCaps(HORZRES), hDC.GetDeviceCaps(VERTRES)
-        printer_size = hDC.GetDeviceCaps(PHYSICALWIDTH), hDC.GetDeviceCaps(PHYSICALHEIGHT)
-        printer_margins = hDC.GetDeviceCaps(PHYSICALOFFSETX), hDC.GetDeviceCaps(PHYSICALOFFSETY)
-        bmp = Image.open(file_name)
-        if bmp.size[0] > bmp.size[1]:
-            bmp = bmp.rotate(90)
-        ratios = [1.0 * printable_area[0] / bmp.size[0], 1.0 * printable_area[1] / bmp.size[1]]
-        scale = min(ratios)
-        hDC.StartDoc(file_name)
-        hDC.StartPage()
-
-        dib = ImageWin.Dib(bmp)
-        scaled_width, scaled_height = [int(scale * i) for i in bmp.size]
-        x1 = int((printer_size[0] - scaled_width) / 2)
-        y1 = int((printer_size[1] - scaled_height) / 2)
-        x2 = x1 + scaled_width
-        y2 = y1 + scaled_height
-        dib.draw(hDC.GetHandleOutput(), (0, 0, 1000, 1000))
-
-        hDC.SetMapMode(win32con.MM_TWIPS)
-        company = "\t\t\t\t test machine printPvt. Ltd.\n"
-        address = "\t\t\t\ttest2, bgbgbgb\n"
-        phone = "\t\t\t\t\t99999999999\n"
-        sample = "\t\t\t\t\tInvoice\n"
-        hDC.DrawText(company + address + phone + sample, (0, INCH * -1, INCH * 8, INCH * -2), 5)
-
-        hDC.EndPage()
-        hDC.EndDoc()
-        hDC.DeleteDC()
-
-        #os.remove('t2.jpg')
-        # conn.commit()
-        # cur.close()
-        # create the bill before updating to the database.
-        #  directory = "D:/Store Management Software/Invoice/" + str(date) + "/"
-
 
     def generate_bill2(self, *args, **kwargs):
-        conn = sqlite3.connect("db_member.db")
-        cursor = conn.cursor()
-        self.get_id = 6
-        query = "SELECT * FROM new_employee WHERE id=?"
 
-        result = cursor.execute(query, (self.get_id,))
-        for self.r in result:
-            self.get_id = self.r[0]
-            self.get_name = self.r[1]
-           # self.get_price = self.r[3]
-            self.get_stock = self.r[2]
+        tkinter.messagebox.showinfo("Success", " biểu mẫu")
 
-        directory = "Software\print/"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+    def endoscopy(self):
+        class tehseencode(QDialog):
+            def __init__(self):
 
-        # TEMPLATES FOR THE BILL
-        company = "\t\t\t\t test machine printPvt. Ltd.\n"
-        address = "\t\t\t\ttest2, bgbgbgb\n"
-        phone = "\t\t\t\t\t99999999999\n"
-        sample = "\t\t\t\t\tInvoice\n"
-        dt = "\t\t\t\t\t" + str(date)
-        table_header = "\n\n\t\t\t---------------------------------------\n\t\t\tSN.\tProducts\t\tQty\t\tAmount\n\t\t\t---------------------------------------"
-        #final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
-        final = company + address + phone + sample + dt +"\n" +str(self.get_id)  +"\n" +str(self.get_stock) +"\n" +  str(self.get_name)  +"\n" +  "\n"  + table_header
+                super(tehseencode, self).__init__()
+                loadUi("untitled2.ui", self)
+                self.logic = 0
+                self.value = 1
+                self.SHOW.clicked.connect(self.onClicked)
+                self.TEXT.setText("Kindly Press 'Show' to connect with webcam.")
+                self.CAPTURE.clicked.connect(self.CaptureClicked)
+                self.NEXT_3.clicked.connect(self.w1)
+                self.CAPTURE_2.clicked.connect(self.f2vrec)
+                self.NEXT_2.clicked.connect(self.w1)
+                self.NEXT_7.clicked.connect(self.w1)
 
-        file_name = str(directory) + str(random.randrange(5000, 10000)) + ".doc"
-        f = open(file_name, 'w')
-        f.write(final)
+            @pyqtSlot()
+            def onClicked(self):
+                self.TEXT.setText('Kindly Press "Capture Image " to Capture image')
+                cap = cv2.VideoCapture(0)
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                op = cv2.VideoWriter('Sample1.avi', fourcc, 11.0, (560, 560))
+                while (cap.isOpened()):
+                    ret, frame = cap.read()
+                    frame = imutils.resize(frame, width=560, height=560)
+                    frame1 = imutils.resize(frame, width=80, height=60)
+                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        # fill dynamics
-        r = 1
-        i = 0
-        for t in products_list:
-            f.write("\n\t\t\t" + str(r) + "\t" + str(products_list[i] + ".......")[:7] + "\t\t" + str(
-                product_quantity[i]) + "\t\t" + str(product_price[i]))
-            i += 1
-            r += 1
-        f.write("\n\n\t\t\tTotal: Rs. " + str(sum(product_price)))
-        f.write("\n\t\t\tThanks for Visiting.")
-        os.startfile(file_name, "print")
-        f.close()
-        tkinter.messagebox.showinfo("Success", "Done everything smoothly")
-        conn.commit()
-        cursor.close()
+                    if ret == True:
+                        self.displayImage(frame, 1)
+                        cv2.waitKey()
+                        if (self.logic == 2):
+                            self.value = self.value + 1
+                            conn = sqlite3.connect("db_member.db")
+                            conn.row_factory = sqlite3.Row
+                            cur = conn.cursor()
+                            cur.execute("SELECT max(id) FROM member")
+                            rows = cur.fetchall()
+                            directory = "anh/"
+                            if not os.path.exists(directory):
+                                os.makedirs(directory)
+                            for row in rows:
+                                print("%s" % (row["max(id)"]))
+                            cv2.imwrite('anh\%s.png' % ("a" + str(row["max(id)"]) + "a" + str(self.value)), frame1)
+                            self.TEXT.setText('your Image have been Saved')
 
-    #if cv2.waitKey(1) & 0xFF == ord('q'):
-    #    break
+                            conn.commit()
+                            conn.close()
+                            self.logic = 1
 
-class tehseencode(QDialog):
-    def __init__(self):
-        super(tehseencode, self).__init__()
-        loadUi("untitled2.ui", self)
-        self.logic = 0
-        self.value = 1
-        self.SHOW.clicked.connect(self.onClicked)
-        self.TEXT.setText("Kindly Press 'Show' to connect with webcam.")
-        self.CAPTURE.clicked.connect(self.CaptureClicked)
-        self.CAPTURE_2.clicked.connect(self.f2vrec)
-        self.NEXT_7.clicked.connect(self.onClose)
-    @pyqtSlot()
+                        if (self.logic == 3):
+                            op.write(frame)
+                        if (self.logic == 4):
+                            cap.release()
+                            break
 
-    # def retriverImage(self):
-    #     conn = sqlite3.connect("db_member.db")
-    #     cursor = conn.cursor()
-    #     cursor.execute("""SELECT * FROM new_employee""")
-    #     result=cursor.fetchone()
-    #     image=result[0]
-    #     pixmap=QtGui.QPixmap()
+                    else:
+                        print('not found')
+                cap.release()
+                cv2.destroyAllWindows()
 
-        #cursor.execute("SELECT * FROM `member` WHERE `name` LIKE ? AND `job`
+            def CaptureClicked(self):
+                self.logic = 2
 
-    def onClicked(self):
+            def displayImage(self, img, window=1):
+                qformat = QImage.Format_Indexed8
+                if len(img.shape) == 3:
+                    if (img.shape[2]) == 4:
+                        qformat = QImage.Format_RGBA888
+                    else:
+                        qformat = QImage.Format_RGB888
+                img = QImage(img, img.shape[1], img.shape[0], qformat)
+                img = img.rgbSwapped()
+                self.imgLabel.setPixmap(QPixmap.fromImage(img))
+                self.imgLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignLeft)
 
-        self.TEXT.setText('Kindly Press "Capture Image " to Capture image')
-        cap = cv2.VideoCapture(0)
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        op = cv2.VideoWriter('Sample1.avi', fourcc, 11.0, (800, 600))
-        while (cap.isOpened()):
-            ret, frame = cap.read()
-            frame = imutils.resize(frame, width=800, height=600)
-            frame1 = imutils.resize(frame, width=200, height=150)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            def f2vrec(self):
+                self.logic = 3
 
-            if ret == True:
-               # print('here')
-                self.displayImage(frame, 1)
-                cv2.waitKey()
-                if (self.logic == 2):
-                    self.value = self.value + 1
-                    conn = sqlite3.connect("db_member.db")
-                    cursor = conn.cursor()
-                    conn.row_factory = sqlite3.Row
-                    cur = conn.cursor()
-                    cur.execute("SELECT max(id) FROM member")
-                    rows = cur.fetchall()
-                    for row in rows:
-                        print("%s" % (row["max(id)"]))
-                    #initial = "SELECT * FROM inventory WHERE id=?"
-                    #result = c.execute(initial, (product_id[self.x],))
-                    cv2.imwrite('anh\%s.png' % (row["max(id)"]), frame1)
-                    self.TEXT.setText('your Image have been Saved')
-                    with open('anh\%s.png' % (row["max(id)"]), 'rb') as f:
-                        data = f.read()
-                    cursor.execute('INSERT INTO new_employee (name,photo)  VALUES(?,?)', (row["max(id)"], data))
-                    conn.commit()
-                    cursor.close()
-                    conn.close()
-                    os.remove('anh\%s.png' % (row["max(id)"]))
-                    self.logic = 1
-                if (self.logic == 3):
-                    op.write(frame)
-                if (self.logic == 4):
-                    cap.release()
-                    break
+            def w1(self):
+                #self.logic = 4
+                window.close()
 
-            else:
-                print('not found')
-        cap.release()
-        cv2.destroyAllWindows()
+            def generate_bill(self, *args, **kwargs):
+                tkinter.messagebox.showinfo("Success", "Tbiểu mẫu")
 
-    def CaptureClicked(self):
-        self.logic = 2
-    def displayImage(self, img, window=1):
-        qformat = QImage.Format_Indexed8
-        if len(img.shape) == 3:
-            if (img.shape[2]) == 4:
-                qformat = QImage.Format_RGBA888
-            else:
-                qformat = QImage.Format_RGB888
-        img = QImage(img, img.shape[1], img.shape[0], qformat)
-        img = img.rgbSwapped()
-        self.imgLabel.setPixmap(QPixmap.fromImage(img))
-        self.imgLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignLeft)
+        window = tehseencode()
+        window.show()
+        try:
+            sys.exit(app.exec_())
+        except:
+            print('excitng')
 
-    def f2vrec(self):
-        self.logic = 3
-
-    def onClose(self):
-        self.destroy()
-        self.logic = 4
 
 app = QApplication(sys.argv)
 b = Application(root)
 
-root.geometry("1360x786+0+0")
+root.geometry("1024x600+0+0")
 root.mainloop()
-
-try:
-    sys.exit(app.exec_())
-except:
-    print('excitng')
-
-
-
 
