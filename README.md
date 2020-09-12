@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import QDialog, QApplication
 from PyQt5.uic import loadUi
 import imutils
 import shutil
+from fpdf import FPDF
+import webbrowser
 
 # date
 today = date.today()
@@ -118,7 +120,7 @@ class Application:
         self.bt_add_patient.place(x=0, y=0)
 
         self.bt_open_file = Button(self.right, text="Mở hồ sơ", width=14, height=3, font=('arial 12 bold'), bg='white',
-                                   command=self.generate_bill2)
+                                   command=self.create_pdf1)
         self.bt_open_file.place(x=150, y=0)
         #
         self.bt_save_file = Button(self.right, text="Làm mới", width=14, height=3, font=('arial 12 bold'), bg='white',
@@ -135,8 +137,7 @@ class Application:
 
         self.bt_thoat.place(x=600, y=0)
         self.bt_thoat = Button(self.right, text="Khôi phục cài đặt gốc", width=14, height=3, font=('arial 12 bold'),
-                               bg='white',
-                               command=self.Deletealldata)
+                               bg='white',command=self.Deletealldata)
         self.bt_thoat.place(x=750, y=0)
 
         self.tenbenhnhan = Label(self.bottom, text="Tên bệnh nhân:", font=('arial 12 bold'), fg='black', bg='lightblue')
@@ -290,12 +291,9 @@ class Application:
         address_pk = self.n2_p.get()
         conn = sqlite3.connect("db_member.db")
         cursor = conn.cursor()
-
         if namepk == '' or name_dt == '' or address_pk == '':
             tkinter.messagebox.showinfo("Error", "Điền đầy đủ thông tin.")
-
         else:
-
             cursor.execute("DELETE FROM print_dt WHERE id=1")
             cursor.execute('CREATE TABLE IF NOT EXISTS print_dt (name_pk TEXT,dt_name TEXT,address TEXT)')
             cursor.execute('INSERT INTO print_dt (name_pk,dt_name,address) VALUES(?,?,?)',
@@ -505,9 +503,45 @@ class Application:
         root.update()
         root.deiconify()
 
-    def generate_bill2(self, *args, **kwargs):
+    def create_pdf1(self):
+        class CustomPDF(FPDF):
 
-        tkinter.messagebox.showinfo("Success", " biểu mẫu")
+            def header(self):
+                # Set up a logo
+                self.image('demo.png', 10, 8, 33)
+
+                self.set_font('Arial', 'B', 30)
+                self.set_text_color(0, 120, 200)
+                self.cell(0, 10, 'CHÚNG TA DÃ TIM bla bla n, USA', 0, 10, 'C')
+                self.cell(0, 10, 'bla bla n, USA', 0, 20, 'C')
+                self.set_font('Arial', 'I', 14)
+                self.set_text_color(100, 120, 200)
+                self.cell(0, 10, 'CHÚNG TA DÃ TIM bla bla n, USA', 0, 10, 'C')
+                self.cell(0, 10, 'bla bla n, USA', 0, 20, 'C')
+                self.ln(20)
+
+            def footer(self):
+                self.set_y(-10)
+                self.set_font('Arial', 'I', 8)
+                # Add a page number
+                page = 'Page ' + str(self.page_no()) + '/{nb}'
+                self.cell(0, 10, page, 0, 0, 'C')
+
+        def create_pdf(pdf_path):
+            pdf = CustomPDF()
+            # Create the special value {nb}
+            pdf.alias_nb_pages()
+            pdf.add_page()
+            pdf.set_font('Times', '', 12)
+            line_no = 1
+            for i in range(50):
+                pdf.cell(0, 10, txt="Line #{}".format(line_no), ln=1)
+                line_no += 1
+            pdf.output(pdf_path)
+
+        if __name__ == '__main__':
+            create_pdf('header_footer.pdf')
+            webbrowser.open_new(r'C:\Users\DELL\Desktop\code\codepython_tuan1-master\header_footer.pdf')
 
     def endoscopy(self):
         class tehseencode(QDialog):
